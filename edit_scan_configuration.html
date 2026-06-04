@@ -1,0 +1,279 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Edit Scan Configuration | Network Monitor{% endblock %}
+
+{% block content %}
+
+<style>
+.setup-shell {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.setup-card {
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(148,163,184,0.18);
+    border-radius: 24px;
+    backdrop-filter: blur(12px);
+    box-shadow:
+        0 10px 30px rgba(15,23,42,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.setup-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.setup-subtitle {
+    color: #64748b;
+}
+
+.info-box {
+    border-radius: 18px;
+    padding: 1rem;
+    background: rgba(11,95,165,0.08);
+    border: 1px solid rgba(11,95,165,0.12);
+}
+
+.scan-box {
+    border-radius: 18px;
+    padding: 1rem;
+    background: rgba(245,130,32,0.08);
+    border: 1px solid rgba(245,130,32,0.12);
+}
+
+.locked-box {
+    border-radius: 18px;
+    padding: 1rem;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.12);
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+.btn-setup {
+    background: linear-gradient(135deg, #0b5fa5, #0d6efd);
+    border: none;
+    padding: 0.85rem 1.4rem;
+    border-radius: 14px;
+    font-weight: 600;
+}
+
+.disabled-field input,
+.disabled-field select,
+.disabled-field textarea {
+    background-color: #f1f5f9 !important;
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+</style>
+
+<div class="setup-shell container py-4">
+
+    <div class="mb-4">
+
+        <h1 class="setup-title">
+            Edit Scan Configuration
+        </h1>
+
+        <p class="setup-subtitle">
+            Update monitoring intervals and heavy scan scheduling.
+        </p>
+
+    </div>
+
+    <div class="row g-4">
+
+        <!-- LEFT -->
+        <div class="col-lg-7">
+
+            <div class="setup-card p-4">
+
+                <h4 class="mb-4">
+                    Monitoring Configuration
+                </h4>
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- SUBNET -->
+                    <div class="mb-4 disabled-field">
+
+                        <label class="form-label">
+                            Subnet Range
+                        </label>
+
+                        {{ form.subnet_range }}
+
+                        <div class="form-text text-danger">
+                            Subnet cannot be changed after setup.
+                        </div>
+
+                    </div>
+
+                    <!-- LIGHT SCAN -->
+                    <div class="mb-4">
+
+                        <label class="form-label">
+                            Light Scan Interval (Minutes)
+                        </label>
+
+                        {{ form.light_scan_interval_minutes }}
+
+                        <div class="form-text">
+                            Fast scans used for monitoring and alert generation.
+                        </div>
+
+                        {% for error in form.light_scan_interval_minutes.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+                    <!-- HEAVY SCAN -->
+                    <div class="mb-4">
+
+                        <label class="form-label">
+                            Heavy Scan After N Light Scans
+                        </label>
+
+                        {{ form.heavy_scan_after_light_cycles }}
+
+                        <div class="form-text">
+                            Deep inventory synchronization frequency.
+                        </div>
+
+                        {% for error in form.heavy_scan_after_light_cycles.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+                    <div class="d-flex gap-3">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-setup"
+                        >
+                            Save Changes
+                        </button>
+
+                        <a
+                            href="{% url 'dashboard:index' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-lg-5">
+
+            <!-- LOCKED SETTINGS -->
+            <div class="setup-card p-4 mb-4">
+
+                <h5 class="mb-3">
+                    Locked Configuration
+                </h5>
+
+                <div class="locked-box">
+
+                    <ul class="mb-0">
+                        <li>Subnet editing is disabled after initial setup.</li>
+                        <li>Authorized device inventory depends on subnet consistency.</li>
+                        <li>Existing scan history must remain tied to the same network.</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <!-- TIMING -->
+            <div class="setup-card p-4 mb-4">
+
+                <h5 class="mb-3">
+                    Estimated Timing
+                </h5>
+
+                <div class="scan-box mb-3">
+
+                    <strong>
+                        Estimated Minimum Scan Time:
+                    </strong>
+
+                    <br>
+
+                    {{ estimated_minutes }} minute(s)
+
+                </div>
+
+                <div class="text-muted small">
+                    Light scan interval must remain greater than the estimated minimum scan time.
+                </div>
+
+            </div>
+
+            <!-- CURRENT STATE -->
+            <div class="setup-card p-4">
+
+                <h5 class="mb-3">
+                    Current Monitoring State
+                </h5>
+
+                <div class="info-box">
+
+                    <ul class="mb-0">
+
+                        <li>
+                            Completed Light Cycles:
+                            <strong>
+                                {{ configuration.completed_light_scan_cycles }}
+                            </strong>
+                        </li>
+
+                        <li>
+                            Heavy Scan Trigger:
+                            <strong>
+                                Every
+                                {{ configuration.heavy_scan_interval_light_cycles }}
+                                light scans
+                            </strong>
+                        </li>
+
+                        <li>
+                            Current Status:
+                            <strong>
+                                {{ configuration.light_scan_status }}
+                            </strong>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

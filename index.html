@@ -1,0 +1,1901 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block title %}Dashboard | Network Monitor{% endblock %}
+ 
+{% block content %}
+ 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+ 
+<style>
+:root {
+    --ink:        #0a0e1a;
+    --ink-2:      #1a2035;
+    --ink-3:      #2a3352;
+    --surface:    #f0f3fa;
+    --surface-2:  #e4e9f5;
+    --border:     rgba(30,50,120,0.13);
+    --border-2:   rgba(30,50,120,0.22);
+ 
+    --blue:       #2563eb;
+    --blue-glow:  rgba(37,99,235,0.18);
+    --blue-dim:   #1e40af;
+    --cyan:       #06b6d4;
+    --cyan-glow:  rgba(6,182,212,0.15);
+ 
+    --green:      #10b981;
+    --green-glow: rgba(16,185,129,0.15);
+    --red:        #ef4444;
+    --red-glow:   rgba(239,68,68,0.15);
+    --amber:      #f59e0b;
+    --amber-glow: rgba(245,158,11,0.15);
+ 
+    --font-display: 'Inter', sans-serif;
+    --font-mono:    'JetBrains Mono', monospace;
+    --font-body:    'Inter', sans-serif;
+ 
+    --r-sm:  8px;
+    --r-md:  14px;
+    --r-lg:  20px;
+    --r-xl:  28px;
+}
+ 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+.nm-root {
+    min-height: 100vh;
+    background: var(--surface);
+    font-family: var(--font-body);
+    color: var(--ink);
+    position: relative;
+    overflow-x: hidden;
+}
+ 
+/* subtle dot-grid background */
+.nm-root::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(37,99,235,0.10) 1px, transparent 0);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+}
+ 
+.nm-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 0.75rem 1rem 1rem;
+}
+ 
+/* ───────────────────── TOPBAR ───────────────────── */
+.nm-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.65rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+ 
+.nm-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+ 
+.nm-brand-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--r-md);
+    background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 18px var(--blue-glow);
+    flex-shrink: 0;
+}
+ 
+.nm-brand-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: #fff;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+ 
+.nm-brand-title {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 3px;
+}
+ 
+.nm-brand-sub {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: #64748b;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+ 
+.nm-topbar-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+ 
+/* ───────────────────── VULNERABILITY CARD ───────────────────── */
+.nm-vuln-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: 0.75rem 0.95rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+}
+ 
+.nm-vuln-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--red) 0%, var(--amber) 50%, var(--green) 100%);
+    border-radius: 4px 0 0 4px;
+}
+ 
+.nm-vuln-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #64748b;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+ 
+.nm-vuln-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    flex: 1;
+}
+ 
+.nm-vpill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+ 
+.nm-vpill-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+ 
+.nm-vpill--high   { background: var(--red-glow);   color: #b91c1c; }
+.nm-vpill--medium { background: var(--amber-glow);  color: #b45309; }
+.nm-vpill--low    { background: var(--green-glow);  color: #065f46; }
+.nm-vpill--high   .nm-vpill-dot { background: var(--red); }
+.nm-vpill--medium .nm-vpill-dot { background: var(--amber); }
+.nm-vpill--low    .nm-vpill-dot { background: var(--green); }
+ 
+/* ───────────────────── STAT GRID ───────────────────── */
+.nm-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+ 
+@media (max-width: 640px) {
+    .nm-stats { grid-template-columns: repeat(2, 1fr); }
+}
+ 
+.nm-stat {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 0.8rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+ 
+.nm-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+}
+ 
+.nm-stat-accent {
+    position: absolute;
+    top: 0; right: 0;
+    width: 60px; height: 60px;
+    border-radius: 0 var(--r-lg) 0 60px;
+    opacity: 0.08;
+}
+ 
+.nm-stat--default .nm-stat-accent { background: var(--blue); }
+.nm-stat--green   .nm-stat-accent { background: var(--green); }
+.nm-stat--red     .nm-stat-accent { background: var(--red); }
+.nm-stat--cyan    .nm-stat-accent { background: var(--cyan); }
+ 
+.nm-stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #64748b;
+    margin-bottom: 0.6rem;
+}
+ 
+.nm-stat-value {
+    font-family: var(--font-display);
+    font-size: 2.3rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+ 
+.nm-stat--default .nm-stat-value { color: var(--ink); }
+.nm-stat--green   .nm-stat-value { color: var(--green); }
+.nm-stat--red     .nm-stat-value { color: var(--red); }
+.nm-stat--cyan    .nm-stat-value { color: var(--cyan); }
+ 
+.nm-stat-tag {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: #94a3b8;
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+}
+ 
+/* ───────────────────── MAIN LAYOUT ───────────────────── */
+.nm-main-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 0.5fr;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+}
+ 
+@media (max-width: 900px) {
+    .nm-main-grid { grid-template-columns: 1fr; }
+}
+ 
+/* ───────────────────── CONTROL CARD ───────────────────── */
+.nm-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: 0.8rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+}
+ 
+.nm-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.9rem;
+}
+ 
+.nm-card-title {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+ 
+.nm-card-title-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--blue);
+    flex-shrink: 0;
+}
+ 
+/* Status pill */
+.nm-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 6px 14px;
+    letter-spacing: 0.03em;
+    border: 1px solid transparent;
+}
+ 
+.nm-status-pill--running {
+    background: var(--green-glow);
+    color: #065f46;
+    border-color: rgba(16,185,129,0.25);
+}
+ 
+.nm-status-pill--waiting {
+    background: var(--amber-glow);
+    color: #92400e;
+    border-color: rgba(245,158,11,0.25);
+}
+ 
+.nm-status-pill--stopped {
+    background: var(--surface-2);
+    color: #64748b;
+    border-color: var(--border-2);
+}
+ 
+.nm-status-pill--heavy {
+    background: var(--blue-glow);
+    color: var(--blue-dim);
+    border-color: rgba(37,99,235,0.25);
+}
+ 
+.nm-status-pill--error {
+    background: var(--red-glow);
+    color: #991b1b;
+    border-color: rgba(239,68,68,0.25);
+}
+ 
+@keyframes nm-pulse {
+    0%,100% { opacity:1; transform: scale(1); }
+    50%      { opacity:.35; transform: scale(0.8); }
+}
+ 
+.nm-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+ 
+.nm-dot--running { background: var(--green); animation: nm-pulse 1.3s ease-in-out infinite; }
+.nm-dot--waiting { background: var(--amber); animation: nm-pulse 2s ease-in-out infinite; }
+.nm-dot--stopped { background: #94a3b8; }
+.nm-dot--heavy   { background: var(--blue); animation: nm-pulse 1.3s ease-in-out infinite; }
+.nm-dot--error   { background: var(--red); }
+ 
+/* Subnet tag */
+.nm-subnet-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--r-sm);
+    padding: 4px 10px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+}
+ 
+/* Progress */
+.nm-progress-wrap {
+    margin-bottom: 0.9rem;
+}
+ 
+.nm-progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+ 
+.nm-progress-name {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #64748b;
+}
+ 
+.nm-progress-pct {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--blue);
+}
+ 
+.nm-progress-track {
+    height: 4px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+ 
+.nm-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue) 0%, var(--cyan) 100%);
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.5s linear;
+}
+ 
+/* Cycle badge */
+.nm-cycle-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: #64748b;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 10px;
+}
+ 
+.nm-cycle-badge b {
+    color: var(--blue);
+    font-weight: 700;
+}
+ 
+/* Time grid */
+.nm-time-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 0.9rem;
+}
+ 
+.nm-time-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 0.75rem 0.85rem;
+}
+ 
+.nm-time-lbl {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+    margin-bottom: 4px;
+}
+ 
+.nm-time-val {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+}
+ 
+/* Actions */
+.nm-actions {
+    display: flex;
+    gap: 10px;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--surface-2);
+}
+ 
+.nm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    border: 1px solid transparent;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+ 
+.nm-btn svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+}
+ 
+.nm-btn--primary {
+    background: var(--blue);
+    color: #0f172a;
+    border-color: var(--blue-dim);
+    box-shadow: 0 2px 10px var(--blue-glow);
+}
+ 
+.nm-btn--primary:hover:not(:disabled) {
+    background: var(--blue-dim);
+    box-shadow: 0 4px 18px rgba(37,99,235,0.35);
+    transform: translateY(-1px);
+}
+ 
+.nm-btn--ghost {
+    background: transparent;
+    color: var(--red);
+    border-color: rgba(239,68,68,0.3);
+}
+ 
+.nm-btn--ghost:hover {
+    background: var(--red-glow);
+}
+ 
+.nm-btn--outline {
+    background: transparent;
+    color: var(--ink-3);
+    border-color: var(--border-2);
+}
+ 
+.nm-btn--outline:hover {
+    background: var(--surface-2);
+}
+ 
+.nm-btn:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+ 
+/* ───────────────────── SIDE PANEL ───────────────────── */
+.nm-side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+ 
+/* Scan info block */
+.nm-scan-info {
+    background: rgba(255,255,255,0.92); color:#0f172a; border:1px solid rgba(15,23,42,0.08);
+    border-radius: var(--r-xl);
+    padding: 0.8rem;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+ 
+.nm-scan-info::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: var(--blue-glow);
+    filter: blur(40px);
+}
+ 
+.nm-scan-info-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 0.75rem;
+}
+ 
+.nm-scan-info-value {
+    font-family: var(--font-display);
+    font-size: 2.3rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: #fff;
+    margin-bottom: 4px;
+}
+ 
+.nm-scan-info-sub {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.04em;
+}
+ 
+.nm-scan-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 1rem 0;
+}
+ 
+.nm-scan-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+ 
+.nm-scan-row:last-child { margin-bottom: 0; }
+ 
+.nm-scan-row-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+ 
+.nm-scan-row-val {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+}
+ 
+/* Cycles progress ring */
+.nm-cycles-ring {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.8rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+}
+ 
+.nm-ring-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #64748b;
+    margin-bottom: 0.65rem;
+}
+ 
+.nm-ring-svg {
+    width: 82px;
+    height: 82px;
+    margin-bottom: 0.75rem;
+}
+ 
+.nm-ring-center-text {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 800;
+    fill: var(--ink);
+}
+ 
+.nm-ring-center-sub {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    fill: #94a3b8;
+}
+ 
+.nm-ring-description {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: #64748b;
+    text-align: center;
+    letter-spacing: 0.03em;
+}
+ 
+.nm-ring-description b {
+    color: var(--blue);
+    font-weight: 700;
+}
+ 
+/* ───────────────────── ALERTS SECTION ───────────────────── */
+.nm-alerts-section {
+    margin-top: 0;
+}
+ 
+.nm-alerts-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.65rem;
+}
+ 
+.nm-alerts-title {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+ 
+.nm-badge-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--red);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+}
+ 
+.nm-alert-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+ 
+.nm-alert-row {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+ 
+.nm-alert-row:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    transform: translateX(2px);
+}
+ 
+.nm-alert-row::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+}
+ 
+.nm-alert-row--high::before   { background: var(--red); }
+.nm-alert-row--medium::before { background: var(--amber); }
+.nm-alert-row--low::before    { background: var(--green); }
+.nm-alert-row--info::before   { background: var(--blue); }
+ 
+.nm-alert-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+}
+ 
+.nm-alert-row--high   .nm-alert-icon { background: var(--red-glow); }
+.nm-alert-row--medium .nm-alert-icon { background: var(--amber-glow); }
+.nm-alert-row--low    .nm-alert-icon { background: var(--green-glow); }
+.nm-alert-row--info   .nm-alert-icon { background: var(--blue-glow); }
+ 
+.nm-alert-body {
+    flex: 1;
+    min-width: 0;
+}
+ 
+.nm-alert-type {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+ 
+.nm-alert-desc {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: #64748b;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+ 
+.nm-alert-time {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding-top: 2px;
+}
+ 
+.nm-empty-alerts {
+    background: #fff;
+    border: 1px dashed var(--border-2);
+    border-radius: var(--r-lg);
+    padding: 2rem;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: #94a3b8;
+    letter-spacing: 0.04em;
+}
+ 
+/* ───────────────────── ALERT POPUP ───────────────────── */
+.nm-alert-popup {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 380px;
+    background: #fff;
+    border-radius: var(--r-xl);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(239,68,68,0.2);
+    z-index: 9999;
+    overflow: hidden;
+    transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.25s;
+    transform: translateY(0);
+    opacity: 1;
+}
+ 
+.nm-alert-popup.hidden {
+    transform: translateY(120%);
+    opacity: 0;
+    pointer-events: none;
+}
+ 
+.nm-alert-popup-bar {
+    height: 4px;
+    background: linear-gradient(90deg, var(--red) 0%, var(--amber) 100%);
+}
+ 
+.nm-alert-popup-inner {
+    padding: 1.1rem 1.25rem;
+}
+ 
+.nm-alert-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0.65rem;
+}
+ 
+.nm-alert-popup-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--r-sm);
+    background: var(--red-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+ 
+.nm-alert-popup-title {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 1px;
+}
+ 
+.nm-alert-popup-sub {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: #94a3b8;
+    letter-spacing: 0.04em;
+}
+ 
+#alert-popup-list {
+    max-height: 170px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 0.65rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-2) transparent;
+}
+ 
+.nm-popup-alert-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 0.6rem 0.85rem;
+}
+ 
+.nm-popup-alert-type {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 2px;
+}
+ 
+.nm-popup-alert-desc {
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+ 
+.nm-alert-popup-actions {
+    display: flex;
+    gap: 8px;
+}
+ 
+/* ───────────────────── CONFIG BUTTON ───────────────────── */
+.nm-config-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    color: var(--ink-3);
+    text-decoration: none;
+    transition: all 0.15s;
+    letter-spacing: 0.01em;
+}
+ 
+.nm-config-btn:hover {
+    background: var(--surface-2);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+}
+ 
+.nm-config-btn svg {
+    width: 12px;
+    height: 12px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+ 
+/* ───────────────────── COUNTDOWN TIMER ───────────────────── */
+.nm-countdown {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: #94a3b8;
+    margin-top: 6px;
+    text-align: right;
+    letter-spacing: 0.04em;
+}
+ 
+.nm-countdown span {
+    color: var(--amber);
+    font-weight: 600;
+}
+ 
+/* section divider */
+.nm-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0 1rem;
+}
+ 
+.nm-section-divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+ 
+.nm-section-divider-label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+ 
+/* page refresh indicator */
+.nm-refresh-tick {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: #94a3b8;
+    letter-spacing: 0.04em;
+}
+ 
+.nm-refresh-tick-dot {
+    width: 5px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: nm-pulse 2s ease-in-out infinite;
+}
+ 
+/* live badge */
+.nm-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--green);
+    background: var(--green-glow);
+    border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 999px;
+    padding: 3px 9px;
+}
+ 
+
+@media (min-width: 1000px){
+    .nm-root{zoom:0.92;}
+    .nm-alert-list{max-height:280px;overflow:auto;padding-right:4px;}
+}
+.nm-card,.nm-stat,.nm-vuln-card,.nm-cycles-ring,.nm-alert-row{
+    backdrop-filter: blur(8px);
+}
+.nm-brand-title,.nm-card-title,.nm-alerts-title{
+    letter-spacing:-0.01em;
+}
+
+
+/* ===== Ultra Compact Professional Layout ===== */
+
+body{
+    overflow:hidden;
+}
+
+.nm-root{
+    background:
+        radial-gradient(circle at top right, rgba(37,99,235,0.08), transparent 35%),
+        linear-gradient(to bottom right,#eef2ff,#f8fafc);
+}
+
+.nm-wrap{
+    height:100vh;
+    overflow:hidden;
+}
+
+.nm-topbar{
+    padding-bottom:0.2rem;
+    border-bottom:1px solid rgba(148,163,184,0.15);
+}
+
+.nm-brand-title{
+    font-size:1.45rem;
+    font-weight:800;
+}
+
+.nm-brand-sub{
+    font-size:0.82rem;
+    opacity:0.7;
+}
+
+.nm-stat{
+    min-height:110px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.78);
+    backdrop-filter: blur(14px);
+}
+
+.nm-stat-label{
+    font-size:0.8rem;
+}
+
+.nm-stat-value{
+    font-size:2.5rem;
+}
+
+.nm-main-grid{
+    align-items:start;
+}
+
+.nm-card,
+.nm-scan-info{
+    border-radius:22px;
+}
+
+.nm-card{
+    background:rgba(255,255,255,0.82);
+    backdrop-filter:blur(18px);
+}
+
+.nm-scan-info{
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.nm-time-grid{
+    grid-template-columns:repeat(3,1fr);
+    gap:0.45rem;
+}
+
+.nm-time-item{
+    padding:0.55rem 0.65rem;
+}
+
+.nm-actions{
+    padding-top:0.8rem;
+}
+
+.nm-btn{
+    border-radius:12px;
+    font-size:0.95rem;
+}
+
+.nm-alerts-header{
+    margin-bottom:0.6rem;
+}
+
+.nm-alert-list{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0.45rem;
+    max-height:260px;
+    overflow:auto;
+}
+
+.nm-alert-row{
+    border-radius:14px;
+    min-height:70px;
+    background:rgba(255,255,255,0.82);
+}
+
+.nm-alert-type{
+    font-size:0.92rem;
+}
+
+.nm-alert-desc{
+    font-size:0.82rem;
+    white-space:normal;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+}
+
+.nm-section-divider{
+    margin:0.8rem 0 0.55rem;
+}
+
+.nm-alert-popup{
+    transform:scale(0.92);
+    transform-origin:bottom right;
+}
+
+@media (max-width:1100px){
+    body{overflow:auto;}
+    .nm-wrap{height:auto;}
+    .nm-alert-list{grid-template-columns:1fr;}
+}
+
+
+/* ===== ISRO Inspired Theme Upgrade ===== */
+
+.nm-root{
+    background:
+        radial-gradient(circle at top left, rgba(255,153,51,0.18), transparent 22%),
+        radial-gradient(circle at top right, rgba(19,136,8,0.16), transparent 26%),
+        radial-gradient(circle at center, rgba(37,99,235,0.08), transparent 45%),
+        linear-gradient(135deg,#eaf1ff 0%,#f8fbff 40%,#eef7ff 100%);
+}
+
+.nm-root::before{
+    opacity:0.5;
+}
+
+.nm-stat,
+.nm-card,
+.nm-alert-row,
+.nm-scan-info{
+    box-shadow:
+        0 10px 35px rgba(15,23,42,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.nm-brand-icon{
+    background:
+        linear-gradient(135deg,#ff9933 0%, #ffffff 50%, #138808 100%);
+}
+
+.nm-brand-title{
+    color:#0b1324;
+    font-weight:900;
+}
+
+.nm-brand-sub{
+    color:#334155;
+    font-size:0.82rem;
+}
+
+.nm-scan-info-label,
+.nm-scan-row-label,
+.nm-scan-info-sub{
+    color:#475569 !important;
+    font-size:0.9rem !important;
+}
+
+.nm-scan-row-val{
+    color:#0f172a !important;
+    font-size:1rem !important;
+}
+
+.nm-card-title,
+.nm-alerts-title{
+    font-size:1.15rem !important;
+}
+
+.nm-stat-label,
+.nm-time-lbl,
+.nm-progress-name{
+    font-size:0.82rem !important;
+}
+
+.nm-time-val,
+.nm-progress-pct,
+.nm-status-pill{
+    font-size:1rem !important;
+}
+
+.nm-alert-type{
+    font-size:1rem !important;
+    font-weight:800;
+}
+
+.nm-alert-desc{
+    font-size:0.9rem !important;
+    line-height:1.45;
+}
+
+.nm-btn{
+    padding:10px 18px;
+    font-size:0.95rem !important;
+    font-weight:800;
+}
+
+.nm-config-btn{
+    font-size:0.9rem !important;
+}
+
+.nm-stat{
+    min-height:130px;
+}
+
+.nm-alert-row{
+    min-height:92px;
+}
+
+.nm-live-badge{
+    font-size:0.8rem !important;
+}
+
+.nm-refresh-tick{
+    font-size:0.82rem !important;
+}
+
+</style>
+ 
+<audio id="alert-sound">
+    <source src="{% static 'sounds/alert.mp3' %}" type="audio/mpeg">
+</audio>
+ 
+<div class="nm-root">
+<div class="nm-wrap">
+ 
+    <!-- ══════════ TOPBAR ══════════ -->
+    <div class="nm-topbar">
+        <div class="nm-brand">
+            <div class="nm-brand-icon">
+                <svg viewBox="0 0 24 24">
+                    <rect x="2" y="2" width="20" height="8" rx="2"/>
+                    <rect x="2" y="14" width="20" height="8" rx="2"/>
+                    <line x1="6" y1="6" x2="6.01" y2="6"/>
+                    <line x1="6" y1="18" x2="6.01" y2="18"/>
+                </svg>
+            </div>
+            <div>
+                <div class="nm-brand-title">Enterprise Network Intelligence</div>
+                <div class="nm-brand-sub">Network intelligence &amp; anomaly monitoring</div>
+            </div>
+        </div>
+        <div class="nm-topbar-actions">
+            <div class="nm-live-badge">
+                <span class="nm-dot nm-dot--running" style="width:5px;height:5px;"></span>
+                Live
+            </div>
+            <span class="nm-refresh-tick">
+                <span class="nm-refresh-tick-dot"></span>
+                Polling every 3s
+            </span>
+            <a href="{% url 'dashboard:edit_scan_configuration' %}" class="nm-config-btn">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.07 4.93A10 10 0 0 0 4.93 19.07M4.93 4.93a10 10 0 0 0 14.14 14.14"/>
+                </svg>
+                Configure
+            </a>
+        </div>
+    </div>
+ 
+    <!-- ══════════ STAT CARDS ══════════ -->
+    <div class="nm-stats">
+        <div class="nm-stat nm-stat--default">
+            <div class="nm-stat-accent"></div>
+            <div class="nm-stat-label">Total Devices</div>
+            <div class="nm-stat-value" id="js-total-devices">{{ total_devices }}</div>
+            <div class="nm-stat-tag">on subnet</div>
+        </div>
+        <div class="nm-stat nm-stat--green">
+            <div class="nm-stat-accent"></div>
+            <div class="nm-stat-label">Online</div>
+            <div class="nm-stat-value" id="js-online-devices">{{ online_devices }}</div>
+            <div class="nm-stat-tag">responding</div>
+        </div>
+        <div class="nm-stat nm-stat--red">
+            <div class="nm-stat-accent"></div>
+            <div class="nm-stat-label">Offline</div>
+            <div class="nm-stat-value" id="js-offline-devices">{{ offline_devices }}</div>
+            <div class="nm-stat-tag">unreachable</div>
+        </div>
+        <div class="nm-stat nm-stat--cyan">
+            <div class="nm-stat-accent"></div>
+            <div class="nm-stat-label">Active Discovery</div>
+            <div class="nm-stat-value">{% if latest_scan %}{{ latest_scan.total_devices_found }}{% else %}0{% endif %}</div>
+            <div class="nm-stat-tag">devices found</div>
+        </div>
+    </div>
+ 
+    {% if configuration %}
+ 
+    <!-- ══════════ MAIN GRID ══════════ -->
+    <div class="nm-main-grid">
+ 
+        <!-- LEFT: CONTROL CARD -->
+        <div class="nm-card">
+            <div class="nm-card-header">
+                <div class="nm-card-title">
+                    <span class="nm-card-title-dot"></span>
+                    Monitoring Control
+                </div>
+                <div class="nm-subnet-tag">{{ configuration.subnet_range }}</div>
+            </div>
+ 
+            <!-- STATUS PILL -->
+            <div style="margin-bottom: 1.25rem;">
+                <div style="font-family: var(--font-mono); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 8px;">System Status</div>
+                <div id="js-status-pill" class="nm-status-pill
+                    {% if configuration.heavy_scan_status == 'RUNNING' %}nm-status-pill--heavy
+                    {% elif configuration.light_scan_status == 'RUNNING' %}nm-status-pill--running
+                    {% elif configuration.light_scan_status == 'WAITING' %}nm-status-pill--waiting
+                    {% elif configuration.light_scan_status == 'STOPPING' %}nm-status-pill--waiting
+                    {% else %}nm-status-pill--stopped{% endif %}">
+ 
+                    {% if configuration.heavy_scan_status == 'RUNNING' %}
+                        <span class="nm-dot nm-dot--heavy"></span> Heavy scan running
+                    {% elif configuration.light_scan_status == 'RUNNING' %}
+                        <span class="nm-dot nm-dot--running"></span> Light scan running
+                    {% elif configuration.light_scan_status == 'WAITING' %}
+                        <span class="nm-dot nm-dot--waiting"></span> Waiting for next scan
+                    {% elif configuration.light_scan_status == 'STOPPING' %}
+                        <span class="nm-dot nm-dot--waiting"></span> Finishing current scan…
+                    {% else %}
+                        <span class="nm-dot nm-dot--stopped"></span> Idle
+                    {% endif %}
+                </div>
+            </div>
+ 
+            <!-- PROGRESS -->
+            <div class="nm-progress-wrap">
+                <div class="nm-progress-row">
+                    <span class="nm-progress-name" id="js-progress-label">Scan / Wait Progress</span>
+                    <span class="nm-progress-pct" id="progress-text">0%</span>
+                </div>
+                <div class="nm-progress-track">
+                    <div id="scan-progress-bar" class="nm-progress-fill"></div>
+                </div>
+                </div>
+ 
+            <!-- TIME GRID -->
+            <div class="nm-time-grid">
+                <div class="nm-time-item">
+                    <div class="nm-time-lbl">Last Light</div>
+                    <div class="nm-time-val" id="js-last-light">
+                        {% if configuration.last_light_scan_finished_at %}
+                            {{ configuration.last_light_scan_finished_at|date:'M d, H:i:s' }}
+                        {% else %}—{% endif %}
+                    </div>
+                </div>
+                <div class="nm-time-item">
+                    <div class="nm-time-lbl">Last Heavy</div>
+                    <div class="nm-time-val" id="js-last-heavy">
+                        {% if configuration.last_heavy_scan_finished_at %}
+                            {{ configuration.last_heavy_scan_finished_at|date:'M d, H:i:s' }}
+                        {% else %}—{% endif %}
+                    </div>
+                </div>
+                <div class="nm-time-item">
+                    <div class="nm-time-lbl">Next Scan</div>
+                    <div class="nm-time-val" id="js-next-scan">
+                        {% if configuration.next_light_scan_time %}
+                            {{ configuration.next_light_scan_time|date:'M d, H:i:s' }}
+                        {% else %}Waiting…{% endif %}
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- ACTIONS -->
+            <div class="nm-actions">
+                <form action="{% url 'dashboard:start_scan' %}" method="post" style="display:contents">
+                    {% csrf_token %}
+                    <button id="js-start-btn" class="nm-btn nm-btn--primary"
+                        {% if configuration.light_scan_status == 'RUNNING' or configuration.light_scan_status == 'WAITING' %}disabled{% endif %}>
+                        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+                        Start Scan
+                    </button>
+                </form>
+                <form action="{% url 'dashboard:stop_scan' %}" method="post" style="display:contents">
+                    {% csrf_token %}
+                    <button class="nm-btn nm-btn--ghost">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" stroke="none"/></svg>
+                        Stop After Current
+                    </button>
+                </form>
+            </div>
+        </div>
+ 
+        <!-- RIGHT: SIDE PANEL -->
+        <div class="nm-side-panel">
+ 
+            <!-- Scan summary dark card -->
+            <div class="nm-scan-info">
+                <div class="nm-scan-info-label">Active Discovery</div>
+                <div class="nm-scan-info-value">
+                    {% if latest_scan %}{{ latest_scan.total_devices_found }}{% else %}0{% endif %}
+                </div>
+                <div class="nm-scan-info-sub">devices found</div>
+                <div class="nm-scan-divider"></div>
+                <div class="nm-scan-row">
+                    <span class="nm-scan-row-label">Subnet</span>
+                    <span class="nm-scan-row-val">{{ configuration.subnet_range }}</span>
+                </div>
+                <div class="nm-scan-row">
+                    <span class="nm-scan-row-label">Interval</span>
+                    <span class="nm-scan-row-val">{{ configuration.light_scan_interval_minutes }}m</span>
+                </div>
+                <div class="nm-scan-row">
+                    <span class="nm-scan-row-label">Heavy every</span>
+                    <span class="nm-scan-row-val">{{ configuration.heavy_scan_interval_light_cycles }} light cycles</span>
+                </div>
+            </div>
+ 
+            </div>
+        </div>
+    </div>
+    </div>
+ 
+    {% endif %}
+ 
+    <!-- ══════════ LATEST ALERTS ══════════ -->
+    <div class="nm-section-divider">
+        <div class="nm-section-divider-line"></div>
+        <div class="nm-section-divider-label">Recent Security Events</div>
+        <div class="nm-section-divider-line"></div>
+    </div>
+ 
+    <div class="nm-alerts-header">
+        <div class="nm-alerts-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Active Alerts
+            <span class="nm-badge-count" id="js-alert-count">{{ total_alerts }}</span>
+        </div>
+        <a href="/alerts/" class="nm-config-btn">View All →</a>
+    </div>
+ 
+    <div class="nm-alert-list" id="js-alert-list">
+        {% for alert in latest_alerts %}
+        <div class="nm-alert-row nm-alert-row--{% if alert.severity == 'HIGH' or alert.risk_level == 'high' %}high{% elif alert.severity == 'MEDIUM' or alert.risk_level == 'medium' %}medium{% elif alert.severity == 'LOW' or alert.risk_level == 'low' %}low{% else %}info{% endif %}">
+            <div class="nm-alert-icon">
+                {% if alert.severity == 'HIGH' or alert.risk_level == 'high' %}🔴
+                {% elif alert.severity == 'MEDIUM' or alert.risk_level == 'medium' %}🟡
+                {% elif alert.severity == 'LOW' or alert.risk_level == 'low' %}🟢
+                {% else %}🔵{% endif %}
+            </div>
+            <div class="nm-alert-body">
+                
+                <div class="nm-alert-desc">{{ alert.description }}</div>
+            </div>
+            <div class="nm-alert-time">{{ alert.created_at|date:'M d, H:i' }}</div>
+        </div>
+        {% empty %}
+        <div class="nm-empty-alerts">
+            ✓ No alerts from the latest scan
+        </div>
+        {% endfor %}
+    </div>
+ 
+</div>
+</div>
+ 
+<!-- ══════════ ALERT POPUP ══════════ -->
+<div id="alert-popup" class="nm-alert-popup hidden">
+    <div class="nm-alert-popup-bar"></div>
+    <div class="nm-alert-popup-inner">
+        <div class="nm-alert-popup-header">
+            <div class="nm-alert-popup-icon">⚠️</div>
+            <div>
+                <div class="nm-alert-popup-title">New Alerts Detected</div>
+                <div class="nm-alert-popup-sub" id="popup-scan-sub">From latest scan</div>
+            </div>
+        </div>
+ 
+        <div id="alert-popup-list"></div>
+ 
+        <div class="nm-alert-popup-actions">
+            <a href="/alerts/" class="nm-btn nm-btn--primary" style="flex:1; justify-content:center;">
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                View Alerts
+            </a>
+            <button onclick="closeAlertPopup()" class="nm-btn nm-btn--ghost">
+                Dismiss
+            </button>
+        </div>
+    </div>
+</div>
+ 
+<script>
+ 
+const POLL_URL      = "{% url 'dashboard:status' %}";
+const ALERTS_URL    = "{% url 'alerts:latest_alerts' %}";
+ 
+const INTERVAL_SECONDS        = {{ configuration.light_scan_interval_seconds|default:300 }};
+const ESTIMATED_SCAN_SECONDS  = {{ configuration.estimated_minimum_scan_seconds|default:60 }};
+const HEAVY_CYCLES_TOTAL      = {{ configuration.heavy_scan_interval_light_cycles|default:5 }};
+ 
+let progressTimer         = null;
+let currentProgressStart  = null;
+let currentProgressDuration = null;
+let countdownTimer        = null;
+ 
+let lastScanId = localStorage.getItem("lastScanId");
+ 
+// ─── Progress bar ───────────────────────────────────────────
+function setProgressBar(startIso, durationSeconds, label) {
+    const start    = new Date(startIso).getTime();
+    const duration = durationSeconds * 1000;
+ 
+    if (currentProgressStart === start && currentProgressDuration === duration) return;
+    currentProgressStart    = start;
+    currentProgressDuration = duration;
+ 
+    if (progressTimer) clearInterval(progressTimer);
+    if (countdownTimer) clearInterval(countdownTimer);
+ 
+    const labelEl    = document.getElementById("js-progress-label");
+    const countdownEl = document.getElementById("js-countdown");
+    const countdownVal = document.getElementById("js-countdown-val");
+ 
+    if (labelEl && label) labelEl.textContent = label;
+ 
+    progressTimer = setInterval(() => {
+        const elapsed = Date.now() - start;
+        const percent = Math.min((elapsed / duration) * 100, 100);
+ 
+        const bar  = document.getElementById("scan-progress-bar");
+        const text = document.getElementById("progress-text");
+        if (bar)  bar.style.width  = percent + "%";
+        if (text) text.textContent = Math.floor(percent) + "%";
+    }, 500);
+ 
+    // countdown overlay (for waiting state)
+    if (label && label.toLowerCase().includes('wait')) {
+        countdownEl.style.display = 'block';
+        countdownTimer = setInterval(() => {
+            const remaining = Math.max(0, Math.ceil((start + duration - Date.now()) / 1000));
+            const m = Math.floor(remaining / 60);
+            const s = remaining % 60;
+            countdownVal.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+            if (remaining === 0) clearInterval(countdownTimer);
+        }, 500);
+    } else {
+        countdownEl.style.display = 'none';
+    }
+}
+ 
+function clearProgressBar() {
+    if (progressTimer)  clearInterval(progressTimer);
+    if (countdownTimer) clearInterval(countdownTimer);
+    progressTimer = countdownTimer = null;
+    currentProgressStart = currentProgressDuration = null;
+ 
+    const bar  = document.getElementById("scan-progress-bar");
+    const text = document.getElementById("progress-text");
+    const cd   = document.getElementById("js-countdown");
+    if (bar)  bar.style.width  = "0%";
+    if (text) text.textContent = "0%";
+    if (cd)   cd.style.display = "none";
+}
+ 
+// ─── Status pill ─────────────────────────────────────────────
+function updateStatusText(light, heavy) {
+    const el = document.getElementById('js-status-pill');
+    if (!el) return;
+ 
+    const dot = (cls) => `<span class="nm-dot nm-dot--${cls}"></span>`;
+ 
+    let cls  = 'stopped';
+    let text = 'Idle';
+ 
+    if (heavy === 'RUNNING') {
+        cls  = 'heavy';
+        text = 'Heavy scan running';
+    } else if (light === 'RUNNING') {
+        cls  = 'running';
+        text = 'Light scan running';
+    } else if (light === 'WAITING') {
+        cls  = 'waiting';
+        text = 'Waiting for next scan';
+    } else if (light === 'STOPPING') {
+        cls  = 'waiting';
+        text = 'Finishing current scan…';
+    } else if (light === 'STOPPED') {
+        cls  = 'stopped';
+        text = 'Monitoring stopped';
+    } else if (light === 'FAILED' || light === 'ERROR') {
+        cls  = 'error';
+        text = 'Scan failed';
+    }
+ 
+    el.innerHTML = dot(cls) + ' ' + text;
+ 
+    // pill colour class
+    el.className = 'nm-status-pill';
+    if (cls === 'running') el.classList.add('nm-status-pill--running');
+    else if (cls === 'heavy')   el.classList.add('nm-status-pill--heavy');
+    else if (cls === 'waiting') el.classList.add('nm-status-pill--waiting');
+    else if (cls === 'error')   el.classList.add('nm-status-pill--error');
+    else                        el.classList.add('nm-status-pill--stopped');
+}
+ 
+// ─── Start button ────────────────────────────────────────────
+function updateStartButton(light) {
+    const btn = document.getElementById('js-start-btn');
+    if (!btn) return;
+    btn.disabled = ['RUNNING', 'WAITING', 'STOPPING'].includes(light);
+}
+ 
+// ─── Device counts ───────────────────────────────────────────
+function updateDeviceCounts(data) {
+    const set = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.textContent = v; };
+    set('js-total-devices',   data.total_devices);
+    set('js-online-devices',  data.online_devices);
+    set('js-offline-devices', data.offline_devices);
+}
+ 
+// ─── Time fields ─────────────────────────────────────────────
+function fmtIso(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month:'short', day:'numeric' })
+         + ', ' + d.toTimeString().slice(0,8);
+}
+ 
+function updateTimes(data) {
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('js-last-light', fmtIso(data.last_light_scan_finished_at));
+    set('js-last-heavy', fmtIso(data.last_heavy_scan_finished_at));
+    set('js-next-scan',  data.next_light_scan_time ? fmtIso(data.next_light_scan_time) : 'Waiting…');
+}
+ 
+// ─── Cycles ring ─────────────────────────────────────────────
+function updateRing(data) {
+    const completed = data.completed_light_scan_cycles || 0;
+    const total     = data.heavy_scan_interval_light_cycles || HEAVY_CYCLES_TOTAL;
+    const remaining = Math.max(0, total - completed);
+    const pct       = total > 0 ? completed / total : 0;
+    const circumference = 251.2;
+    const offset = circumference - (pct * circumference);
+ 
+    const ring    = document.getElementById('js-ring-fill');
+    const numEl   = document.getElementById('js-ring-num');
+    const descEl  = document.getElementById('js-ring-num-desc');
+ 
+    if (ring)   ring.style.strokeDashoffset = offset;
+    if (numEl)  numEl.textContent  = remaining;
+    if (descEl) descEl.textContent = remaining;
+}
+ 
+// ─── Main poll ───────────────────────────────────────────────
+function poll() {
+    fetch(POLL_URL)
+        .then(r => r.json())
+        .then(data => {
+            const light = data.light_scan_status;
+            const heavy = data.heavy_scan_status;
+ 
+            updateStatusText(light, heavy);
+            updateStartButton(light);
+            updateDeviceCounts(data);
+            updateTimes(data);
+            updateRing(data);
+ 
+            if (heavy === 'RUNNING' && data.current_heavy_scan_started_at) {
+                setProgressBar(
+                    data.current_heavy_scan_started_at,
+                    (data.estimated_minimum_scan_seconds || ESTIMATED_SCAN_SECONDS) * 3,
+                    'Heavy Scan Progress'
+                );
+            } else if (light === 'RUNNING' && data.current_light_scan_started_at) {
+                setProgressBar(
+                    data.current_light_scan_started_at,
+                    data.estimated_minimum_scan_seconds || ESTIMATED_SCAN_SECONDS,
+                    'Light Scan Progress'
+                );
+            } else if (light === 'WAITING' && data.last_light_scan_finished_at) {
+                setProgressBar(
+                    data.last_light_scan_finished_at,
+                    data.light_scan_interval_seconds || INTERVAL_SECONDS,
+                    'Wait until next scan'
+                );
+            } else {
+                clearProgressBar();
+            }
+        })
+        .catch(err => console.error('Poll failed:', err));
+}
+ 
+// ─── Alert popup ─────────────────────────────────────────────
+let popupOpen = false;
+let popupScanId = null;
+ 
+function closeAlertPopup() {
+    document.getElementById("alert-popup").classList.add("hidden");
+    popupOpen = false;
+}
+ 
+function showAlertPopup(alerts, scanId) {
+    const popup = document.getElementById("alert-popup");
+    const list  = document.getElementById("alert-popup-list");
+    const sub   = document.getElementById("popup-scan-sub");
+ 
+    list.innerHTML = "";
+    alerts.forEach(alert => {
+        list.innerHTML += `
+            <div class="nm-popup-alert-item">
+                <div class="nm-popup-alert-type">${alert.type || alert.alert_type || 'Alert'}</div>
+                <div class="nm-popup-alert-desc">${alert.description || ''}</div>
+            </div>
+        `;
+    });
+ 
+    if (sub) sub.textContent = `Scan #${scanId} · ${alerts.length} alert${alerts.length > 1 ? 's' : ''}`;
+ 
+    popup.classList.remove("hidden");
+    popupOpen  = true;
+    popupScanId = scanId;
+ 
+    document.getElementById("alert-sound")
+        .play().catch(() => {});
+}
+ 
+// ─── Alert poll ──────────────────────────────────────────────
+function pollAlerts() {
+    fetch(ALERTS_URL)
+        .then(r => r.json())
+        .then(data => {
+            const alerts      = data.alerts;
+            const currentScan = data.scan_id;
+ 
+            if (!currentScan) return;
+ 
+            const isNewScan = String(currentScan) !== String(lastScanId);
+ 
+            if (!isNewScan) return;  // same scan, do nothing
+ 
+            // New scan detected — update stored id
+            lastScanId = currentScan;
+            localStorage.setItem("lastScanId", currentScan);
+ 
+            // If popup was open for a previous scan, close it first
+            if (popupOpen && popupScanId !== currentScan) {
+                closeAlertPopup();
+            }
+ 
+            if (!alerts || !alerts.length) return;  // new scan but no alerts
+ 
+            // Show popup for new scan with alerts
+            showAlertPopup(alerts, currentScan);
+ 
+            // Also refresh the inline alert list
+            refreshInlineAlerts(alerts);
+        })
+        .catch(err => console.error('Alert poll failed:', err));
+}
+ 
+function refreshInlineAlerts(alerts) {
+    const list = document.getElementById("js-alert-list");
+    if (!list) return;
+ 
+    const countEl = document.getElementById("js-alert-count");
+    if (countEl) countEl.textContent = alerts.length;
+ 
+    if (!alerts.length) {
+        list.innerHTML = `<div class="nm-empty-alerts">✓ No alerts from the latest scan</div>`;
+        return;
+    }
+ 
+    list.innerHTML = alerts.map(a => {
+        const sev = (a.severity || a.risk_level || 'info').toLowerCase();
+        const cls = ['high','medium','low'].includes(sev) ? sev : 'info';
+        const icon = cls === 'high' ? '🔴' : cls === 'medium' ? '🟡' : cls === 'low' ? '🟢' : '🔵';
+        return `
+            <div class="nm-alert-row nm-alert-row--${cls}">
+                <div class="nm-alert-icon">${icon}</div>
+                <div class="nm-alert-body">
+                    <div class="nm-alert-type">${a.type || a.alert_type || 'Alert'}</div>
+                    <div class="nm-alert-desc">${a.description || ''}</div>
+                </div>
+                <div class="nm-alert-time">${a.created_at ? new Date(a.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</div>
+            </div>
+        `;
+    }).join('');
+}
+ 
+// ─── Init ────────────────────────────────────────────────────
+ 
+// Prime the last scan id silently on load (don't pop up for already-seen alerts)
+fetch(ALERTS_URL)
+    .then(r => r.json())
+    .then(data => {
+        const currentScan = data.scan_id;
+        if (!currentScan) return;
+ 
+        const isNewScan = String(currentScan) !== String(lastScanId);
+        if (!isNewScan) return;  // already seen
+ 
+        // First-load: if there are alerts AND we haven't seen this scan, show popup
+        if (data.alerts && data.alerts.length) {
+            lastScanId = currentScan;
+            localStorage.setItem("lastScanId", currentScan);
+            showAlertPopup(data.alerts, currentScan);
+            refreshInlineAlerts(data.alerts);
+        } else {
+            // No alerts: just record the scan id silently
+            lastScanId = currentScan;
+            localStorage.setItem("lastScanId", currentScan);
+        }
+    })
+    .catch(() => {});
+ 
+poll();
+setInterval(poll,        3000);
+setInterval(pollAlerts,  3000);
+ 
+</script>
+ 
+{% endblock %}

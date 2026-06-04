@@ -1,0 +1,261 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}
+Alerts | Network Monitor
+{% endblock %}
+
+{% block content %}
+
+<style>
+:root {
+    --bg-main: #eef3f8;
+    --card-bg: #f8fafc;
+    --surface: rgba(255,255,255,0.72);
+
+    --isro-orange: #f58220;
+    --isro-orange-soft: rgba(245,130,32,0.12);
+
+    --isro-blue: #0b5fa5;
+    --isro-blue-soft: rgba(11,95,165,0.10);
+
+    --text-main: #1e293b;
+    --text-soft: #64748b;
+
+    --border-soft: rgba(148,163,184,0.18);
+
+    --danger-bg: rgba(239,68,68,0.10);
+    --danger-text: #b91c1c;
+
+    --success-bg: rgba(34,197,94,0.10);
+    --success-text: #166534;
+}
+
+/* ROW STATUS COLORS */
+.table-danger { background: rgba(239,68,68,0.08) !important; }
+.table-warning { background: rgba(245,158,11,0.08) !important; }
+.table-success { background: rgba(34,197,94,0.08) !important; }
+.table-secondary { background: rgba(107,114,128,0.08) !important; }
+
+body {
+    background:
+        radial-gradient(circle at top right, rgba(245,130,32,0.08), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(11,95,165,0.08), transparent 30%),
+        var(--bg-main);
+
+    overflow: hidden;
+}
+
+.alert-shell {
+    height: calc(100vh - 110px);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+/* HEADER */
+.section-header {
+    background: linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.52));
+    border: 1px solid var(--border-soft);
+    border-radius: 24px;
+    padding: 1.5rem 1.8rem;
+    backdrop-filter: blur(12px);
+}
+
+/* TABLE */
+.table-card {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: linear-gradient(145deg, rgba(255,255,255,0.80), rgba(255,255,255,0.60));
+    border-radius: 24px;
+    border: 1px solid var(--border-soft);
+    backdrop-filter: blur(14px);
+    padding: 1rem;
+}
+
+.table-scroll {
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* ALERT TYPE BADGES */
+.badge-alert {
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.badge-new { background: rgba(59,130,246,0.10); color: #1d4ed8; }
+.badge-missing { background: var(--danger-bg); color: var(--danger-text); }
+.badge-os { background: rgba(168,85,247,0.10); color: #7e22ce; }
+.badge-ip { background: rgba(245,158,11,0.10); color: #b45309; }
+
+.status-select {
+    border-radius: 10px;
+    border: 1px solid rgba(148,163,184,0.20);
+    padding: 0.45rem 0.7rem;
+    background: rgba(255,255,255,0.90);
+}
+
+.mac-text {
+    font-family: Consolas, monospace;
+    color: var(--isro-blue);
+    font-weight: 600;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-soft);
+    padding: 5rem 1rem !important;
+}
+</style>
+
+<div class="alert-shell">
+
+    <!-- HEADER -->
+    <div class="section-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+            <div>
+                <div class="section-title">Network Alerts</div>
+                <div class="section-copy">Alerts generated from scan comparison engine.</div>
+            </div>
+
+            <div class="alert-count">
+                {{ alerts|length }} Total Alerts
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+        <div class="table-scroll">
+
+            <table class="table align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Alert Type</th>
+                        <th>Device</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for alert in alerts %}
+
+                    <tr
+                        class="
+                        {% if alert.status == 'NEW' %}table-danger
+                        {% elif alert.status == 'ACKNOWLEDGED' %}table-warning
+                        {% elif alert.status == 'RESOLVED' %}table-success
+                        {% elif alert.status == 'IRRELEVANT' %}table-secondary
+                        {% endif %}
+                        "
+                        data-alert-id="{{ alert.id }}"
+                    >
+
+                        <td>{{ alert.created_at|date:'M d, Y · H:i:s' }}</td>
+
+                        <td>
+                            {% if alert.alert_type == "NEW_DEVICE" %}
+                                <span class="badge-alert badge-new">New Device</span>
+
+                            {% elif alert.alert_type == "IP_CHANGE" %}
+                                <span class="badge-alert badge-ip">IP Change</span>
+
+                            {% elif alert.alert_type == "DEVICE_MISSING" %}
+                                <span class="badge-alert badge-missing">Device Missing</span>
+
+                            {% elif alert.alert_type == "OS_CHANGE" %}
+                                <span class="badge-alert badge-os">OS Change</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="mac-text">{{ alert.device.mac_address }}</div>
+                            <small class="text-muted">{{ alert.device.ip_address }}</small>
+                        </td>
+
+                        <td>{{ alert.description }}</td>
+
+                        <td>
+                            <select class="status-select" data-alert-id="{{ alert.id }}">
+
+                                <option value="NEW" {% if alert.status == "NEW" %}selected{% endif %}>New</option>
+                                <option value="ACKNOWLEDGED" {% if alert.status == "ACKNOWLEDGED" %}selected{% endif %}>Acknowledged</option>
+                                <option value="RESOLVED" {% if alert.status == "RESOLVED" %}selected{% endif %}>Resolved</option>
+                                <option value="IRRELEVANT" {% if alert.status == "IRRELEVANT" %}selected{% endif %}>Irrelevant</option>
+
+                            </select>
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            No alerts generated yet.
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- OPTIONAL SOUND -->
+<audio id="alertSound" src="/static/sounds/alert.mp3" preload="auto"></audio>
+
+<script>
+
+document.querySelectorAll('.status-select').forEach(select => {
+
+    select.addEventListener('change', async function () {
+
+        const alertId = this.dataset.alertId;
+        const status = this.value;
+
+        const res = await fetch(`/alerts/update-status/${alertId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ status })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+
+            const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
+
+            row.classList.remove(
+                'table-danger',
+                'table-warning',
+                'table-success',
+                'table-secondary'
+            );
+
+            if (status === 'NEW') row.classList.add('table-danger');
+            if (status === 'ACKNOWLEDGED') row.classList.add('table-warning');
+            if (status === 'RESOLVED') row.classList.add('table-success');
+            if (status === 'IRRELEVANT') row.classList.add('table-secondary');
+        }
+    });
+});
+
+</script>
+
+{% endblock %}
