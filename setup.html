@@ -4,149 +4,105 @@
 
 {% block content %}
 
-
-
 <div class="d-flex flex-column gap-3 py-4">
 
-    <div class="mb-4">
-        <h1 class="setup-title">Network Monitoring Setup</h1>
-        <p class="setup-subtitle">
-            Configure heavy and light scan architecture for master inventory monitoring.
-        </p>
+    <!-- HEADER -->
+    <div class="section-header" style="margin-bottom: 1rem;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="section-title">Network Monitoring Setup</h1>
+                <div class="section-copy">Configure deep and quick scan architecture for master inventory monitoring.</div>
+            </div>
+        </div>
     </div>
 
     <div class="row g-4">
 
-        <!-- LEFT -->
+        <!-- LEFT (FORM) -->
         <div class="col-lg-7">
-
-            <div class="ent-card p-4">
-
-                <h4 class="mb-4">Scan Configuration</h4>
+            <div class="card-shell">
+                <h4 style="font-family: var(--font-display); font-weight: 800; color: var(--ink); margin-bottom: 1.5rem; letter-spacing: -0.02em;">Scan Configuration</h4>
 
                 <form method="post">
-
                     {% csrf_token %}
 
                     <!-- SUBNET -->
                     <div class="mb-4">
-
-                        <label class="form-label">Subnet Range</label>
-
+                        <label class="form-label" style="font-family: var(--font-display); font-weight: 700; color: var(--ink-2); font-size: 0.95rem;">Target Subnet Range</label>
                         {{ form.subnet_range }}
-
                         {% for error in form.subnet_range.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ error }}
-                            </div>
+                            <div class="text-danger small mt-1" style="font-family: var(--font-body); font-weight: 600;">{{ error }}</div>
                         {% endfor %}
-
                     </div>
 
                     <!-- LIGHT SCAN -->
                     <div class="mb-4">
-
-                        <label class="form-label">
-                            Light Scan Interval (Minutes)
-                        </label>
-
+                        <label class="form-label" style="font-family: var(--font-display); font-weight: 700; color: var(--ink-2); font-size: 0.95rem;">Quick Scan Interval (Minutes)</label>
                         {{ form.light_scan_interval_minutes }}
-
-                        <div class="form-text">
-                            Fast scans for device monitoring and alert generation.
+                        <div class="form-text" style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-3); margin-top: 6px;">
+                            Fast sweeps for active device tracking and anomaly alert generation.
                         </div>
-
                         {% for error in form.light_scan_interval_minutes.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ error }}
-                            </div>
+                            <div class="text-danger small mt-1" style="font-family: var(--font-body); font-weight: 600;">{{ error }}</div>
                         {% endfor %}
-
                     </div>
 
-                    <!-- HEAVY SCAN (FIXED) -->
+                    <!-- HEAVY SCAN -->
                     <div class="mb-4">
-
-                        <label class="form-label">
-                            Heavy Scan After N Light Scans
-                        </label>
-
+                        <label class="form-label" style="font-family: var(--font-display); font-weight: 700; color: var(--ink-2); font-size: 0.95rem;">Deep Scan Trigger (After N Quick Scans)</label>
                         {{ form.heavy_scan_after_light_cycles }}
-
-                        <div class="form-text">
-                            Deep scan runs after a number of light scan cycles to update master inventory.
+                        <div class="form-text" style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-3); margin-top: 6px;">
+                            Comprehensive port and service mapping to rebuild master inventory database.
                         </div>
-
                         {% for error in form.heavy_scan_after_light_cycles.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ error }}
-                            </div>
+                            <div class="text-danger small mt-1" style="font-family: var(--font-body); font-weight: 600;">{{ error }}</div>
                         {% endfor %}
-
                     </div>
 
-                    <button type="submit" class=" ent-btn ent-btn-primary w-100">
+                    <button type="submit" class="nm-btn nm-btn--primary w-100" style="margin-top: 1rem; padding: 14px;">
                         Save Configuration
                     </button>
-
                 </form>
-
             </div>
-
         </div>
 
-        <!-- RIGHT -->
+        <!-- RIGHT (INFO) -->
         <div class="col-lg-5">
 
-            <!-- MASTER DB -->
-            <div class="ent-card p-4 mb-4">
-
-                <h5 class="mb-3">Master Inventory Logic</h5>
-
-                <div class="info-box">
-
-                    <ul class="mb-0">
-                        <li>First heavy scan creates master inventory.</li>
-                        <li>Heavy scans overwrite device metadata.</li>
-                        <li>Heavy scans DO NOT create alerts except OS change alerts.</li>
-                        <li>Light scans compare against master inventory.</li>
-                        <li>Alerts are generated ONLY from light scans.</li>
-                        <li>Four parallel threads are used for both scan types.</li>
+            <!-- MASTER DB INFO -->
+            <div class="card-shell mb-4" style="background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dim) 100%); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                <h5 style="font-family: var(--font-display); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.01em;">Engine Architecture</h5>
+                
+                <div style="font-family: var(--font-body); font-size: 0.95rem; line-height: 1.6; color: rgba(255,255,255,0.85);">
+                    <ul style="margin-bottom: 0; padding-left: 1.2rem;">
+                        <li style="margin-bottom: 8px;">Initial deep scan generates baseline inventory.</li>
+                        <li style="margin-bottom: 8px;">Subsequent deep scans permanently overwrite device metadata.</li>
+                        <li style="margin-bottom: 8px;">Quick scans actively compare current state against baseline.</li>
+                        <li style="margin-bottom: 8px;">Alerts are generated exclusively by rapid anomalies detected in Quick Scans.</li>
+                        <li>Scan tasks execute concurrently across 4 parallel threads for maximum performance.</li>
                     </ul>
-
                 </div>
-
             </div>
 
-            <!-- TIMING -->
-            <div class="ent-card p-4">
-
-                <h5 class="mb-3">Estimated Timing</h5>
-
+            <!-- TIMING INFO -->
+            <div class="card-shell">
+                <h5 style="font-family: var(--font-display); font-weight: 800; color: var(--ink); margin-bottom: 1rem; letter-spacing: -0.01em;">Estimated Execution Time</h5>
+                
                 {% if estimated_minutes %}
-
-                    <div class="scan-box mb-3">
-
-                        <strong>Estimated Scan Time:</strong>
-
-                        <br>
-
-                        {{ estimated_minutes }} minute(s)
-
+                    <div style="background: var(--green-light); border: 1px solid var(--green-glow); border-radius: var(--r-md); padding: 1rem;">
+                        <div class="text-mono" style="font-size: 0.75rem; color: var(--green); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Baseline Estimate</div>
+                        <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: var(--green);">
+                            ~{{ estimated_minutes }} minute(s)
+                        </div>
                     </div>
-
                 {% else %}
-
-                    <div class="text-muted">
-                        Enter subnet details to calculate estimated scan durations.
+                    <div class="text-mono" style="font-size: 0.85rem; color: var(--ink-3); background: var(--surface-3); border: 1px dashed var(--border-2); border-radius: var(--r-md); padding: 1rem; text-align: center;">
+                        Configure a target subnet to view estimated sweep durations.
                     </div>
-
                 {% endif %}
-
             </div>
 
         </div>
-
     </div>
 
 </div>

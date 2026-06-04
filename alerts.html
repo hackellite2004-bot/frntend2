@@ -6,120 +6,91 @@ Alerts | Network Monitor
 
 {% block content %}
 
-
-
 <div class="alert-shell">
 
     <!-- HEADER -->
     <div class="section-header">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-
             <div>
-                <div class="section-title">Network Alerts</div>
-                <div class="section-copy">Alerts generated from scan comparison engine.</div>
+                <div class="section-title">Scan Alerts &amp; Security Events</div>
+                <div class="section-copy">Alerts generated from the network anomaly detection engine.</div>
             </div>
-
-            <div class="alert-count">
-                {{ alerts|length }} Total Alerts
+            <div>
+                <span class="badge-alert" style="background: var(--red-light); color: var(--red); border: 1px solid var(--red-glow); font-size: 0.85rem;">
+                    {{ alerts|length }} Total Alerts
+                </span>
             </div>
-
         </div>
     </div>
 
     <!-- TABLE -->
     <div class="ent-table-wrapper">
         <div class="table-scroll">
-
             <table class="table align-middle">
-
                 <thead>
                     <tr>
-                        <th>Time</th>
+                        <th>Time Detected</th>
                         <th>Alert Type</th>
-                        <th>Device</th>
+                        <th>Device Affected</th>
                         <th>Description</th>
-                        <th>Status</th>
+                        <th style="width: 160px;">Status</th>
                     </tr>
                 </thead>
-
                 <tbody>
-
                 {% for alert in alerts %}
-
-                    <tr
-                        class="
-                        {% if alert.status == 'NEW' %}table-danger
-                        {% elif alert.status == 'ACKNOWLEDGED' %}table-warning
-                        {% elif alert.status == 'RESOLVED' %}table-success
-                        {% elif alert.status == 'IRRELEVANT' %}table-secondary
-                        {% endif %}
-                        "
-                        data-alert-id="{{ alert.id }}"
-                    >
-
-                        <td>{{ alert.created_at|date:'M d, Y · H:i:s' }}</td>
-
+                    <tr class="{% if alert.status == 'NEW' %}table-danger{% elif alert.status == 'ACKNOWLEDGED' %}table-warning{% elif alert.status == 'RESOLVED' %}table-success{% elif alert.status == 'IRRELEVANT' %}table-secondary{% endif %}" data-alert-id="{{ alert.id }}">
+                        <td class="text-mono" style="font-size: 0.85rem; color: var(--ink-3);">{{ alert.created_at|date:'M d, Y · H:i:s' }}</td>
+                        
                         <td>
                             {% if alert.alert_type == "NEW_DEVICE" %}
-                                <span class="badge-alert badge-new">New Device</span>
-
+                                <span class="badge-alert" style="background: var(--cyan-light); color: var(--cyan); border-color: var(--cyan-glow);">New Device</span>
                             {% elif alert.alert_type == "IP_CHANGE" %}
-                                <span class="badge-alert badge-ip">IP Change</span>
-
+                                <span class="badge-alert" style="background: var(--amber-light); color: var(--amber); border-color: var(--amber-glow);">IP Change</span>
                             {% elif alert.alert_type == "DEVICE_MISSING" %}
-                                <span class="badge-alert badge-missing">Device Missing</span>
-
+                                <span class="badge-alert" style="background: var(--surface-3); color: var(--ink-3); border-color: var(--border-2);">Device Missing</span>
                             {% elif alert.alert_type == "OS_CHANGE" %}
-                                <span class="badge-alert badge-os">OS Change</span>
+                                <span class="badge-alert" style="background: var(--blue-glow); color: var(--blue); border-color: rgba(11,54,101,0.25);">OS Change</span>
                             {% endif %}
                         </td>
 
                         <td>
                             <div class="mac-text">{{ alert.device.mac_address }}</div>
-                            <small class="text-muted">{{ alert.device.ip_address }}</small>
+                            <div class="text-mono" style="font-size: 0.75rem; color: var(--ink-3); margin-top: 4px;">{{ alert.device.ip_address }}</div>
                         </td>
 
-                        <td>{{ alert.description }}</td>
+                        <td style="font-weight: 500;">{{ alert.description }}</td>
 
                         <td>
                             <select class="status-select" data-alert-id="{{ alert.id }}">
-
                                 <option value="NEW" {% if alert.status == "NEW" %}selected{% endif %}>New</option>
                                 <option value="ACKNOWLEDGED" {% if alert.status == "ACKNOWLEDGED" %}selected{% endif %}>Acknowledged</option>
                                 <option value="RESOLVED" {% if alert.status == "RESOLVED" %}selected{% endif %}>Resolved</option>
                                 <option value="IRRELEVANT" {% if alert.status == "IRRELEVANT" %}selected{% endif %}>Irrelevant</option>
-
                             </select>
                         </td>
-
                     </tr>
-
                 {% empty %}
                     <tr>
-                        <td colspan="5" class="empty-state">
-                            No alerts generated yet.
+                        <td colspan="5" style="text-align:center; padding: 4rem 1rem; color: var(--ink-3);">
+                            <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--green);">
+                                ✓ No active security alerts found.
+                            </div>
+                            <div class="text-mono" style="font-size: 0.85rem; margin-top: 8px;">Network is operating securely.</div>
                         </td>
                     </tr>
                 {% endfor %}
-
                 </tbody>
-
             </table>
-
         </div>
     </div>
-
 </div>
 
 <!-- OPTIONAL SOUND -->
 <audio id="alertSound" src="/static/sounds/alert.mp3" preload="auto"></audio>
 
 <script>
-
 document.querySelectorAll('.status-select').forEach(select => {
-
     select.addEventListener('change', async function () {
-
         const alertId = this.dataset.alertId;
         const status = this.value;
 
@@ -135,15 +106,8 @@ document.querySelectorAll('.status-select').forEach(select => {
         const data = await res.json();
 
         if (data.success) {
-
             const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
-
-            row.classList.remove(
-                'table-danger',
-                'table-warning',
-                'table-success',
-                'table-secondary'
-            );
+            row.classList.remove('table-danger', 'table-warning', 'table-success', 'table-secondary');
 
             if (status === 'NEW') row.classList.add('table-danger');
             if (status === 'ACKNOWLEDGED') row.classList.add('table-warning');
@@ -152,7 +116,6 @@ document.querySelectorAll('.status-select').forEach(select => {
         }
     });
 });
-
 </script>
 
 {% endblock %}

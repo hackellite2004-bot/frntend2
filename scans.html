@@ -6,131 +6,100 @@ Scans | Network Monitor
 
 {% block content %}
 
+<div class="card-shell d-flex flex-column gap-3">
 
-
-<div class="scans-shell">
-
-    <div class="section-header">
-
+    <!-- HEADER -->
+    <div class="section-header" style="margin-bottom: 1rem;">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-
             <div>
-
-                <div class="section-title">
-                    Scan History
-                </div>
-
+                <h1 class="section-title">Scan History</h1>
                 <div class="section-copy">
-                    Heavy scans update the master inventory database.
-                    Light scans generate comparison-based alerts.
+                    Comprehensive log of all network mapping and anomaly detection cycles.
+                </div>
+            </div>
+
+            <div class="d-flex gap-3">
+                <div class="card-shell" style="padding: 0.5rem 1rem; border-radius: var(--r-md); background: var(--surface-3); box-shadow: none;">
+                    <div class="text-mono" style="font-size: 0.65rem; color: var(--ink-3); text-transform: uppercase;">Deep Scans</div>
+                    <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: var(--blue);">{{ heavy_count }}</div>
                 </div>
 
+                <div class="card-shell" style="padding: 0.5rem 1rem; border-radius: var(--r-md); background: var(--surface-3); box-shadow: none;">
+                    <div class="text-mono" style="font-size: 0.65rem; color: var(--ink-3); text-transform: uppercase;">Quick Scans</div>
+                    <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: var(--cyan);">{{ light_count }}</div>
+                </div>
             </div>
-
         </div>
-
-        <div class="scan-tabs">
-
-            <div class="scan-tab">
-                Heavy Scans:
-                {{ heavy_count }}
-            </div>
-
-            <div class="scan-tab">
-                Light Scans:
-                {{ light_count }}
-            </div>
-
-        </div>
-
     </div>
 
-    <div class="table-card">
-
+    <!-- TABLE -->
+    <div class="ent-table-wrapper mt-2">
         <div class="table-scroll">
-
             <table class="table align-middle">
-
                 <thead>
-
                     <tr>
-                        <th>Scan Type</th>
-                        <th>Subnet</th>
-                        <th>Devices</th>
+                        <th style="width: 150px;">Scan Profile</th>
+                        <th>Target Subnet</th>
+                        <th>Devices Detected</th>
                         <th>Duration</th>
-                        <th>Created At</th>
+                        <th>Timestamp</th>
                     </tr>
-
                 </thead>
-
                 <tbody>
-
                     {% for scan in scans %}
-
                     <tr>
-
                         <td>
-
                             {% if scan.scan_type == 'HEAVY' %}
-
-                            <span class="badge-scan badge-heavy">
-                                Heavy Scan
+                            <span class="badge-alert" style="background: var(--blue-glow); color: var(--blue); border-color: rgba(11,54,101,0.25);">
+                                Deep Scan
                             </span>
-
                             {% else %}
-
-                            <span class="badge-scan badge-light">
-                                Light Scan
+                            <span class="badge-alert" style="background: var(--cyan-light); color: var(--cyan); border-color: var(--cyan-glow);">
+                                Quick Scan
                             </span>
-
                             {% endif %}
-
                         </td>
 
                         <td>
-                            <span class="subnet-pill">
+                            <span class="text-mono" style="font-size: 0.85rem; font-weight: 600; color: var(--ink-2); background: var(--surface-3); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);">
                                 {{ scan.subnet_scanned }}
                             </span>
                         </td>
 
                         <td>
-                            <span class="count-pill">
+                            <span style="font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--ink);">
                                 {{ scan.total_devices_found }}
+                            </span>
+                            <span class="text-mono" style="font-size: 0.75rem; color: var(--ink-3); margin-left: 4px;">hosts</span>
+                        </td>
+
+                        <td>
+                            <span class="text-mono" style="font-size: 0.85rem; color: var(--ink-2);">
+                                {% if scan.scan_duration_seconds %}
+                                    {{ scan.scan_duration_seconds }} sec
+                                {% else %}
+                                    —
+                                {% endif %}
                             </span>
                         </td>
 
-                        <td>
-                            {% if scan.scan_duration_seconds %}
-                                {{ scan.scan_duration_seconds }} sec
-                            {% else %}
-                                —
-                            {% endif %}
-                        </td>
-
-                        <td>
+                        <td class="text-mono" style="font-size: 0.85rem; color: var(--ink-3);">
                             {{ scan.created_at|date:'M d, Y · H:i:s' }}
                         </td>
-
                     </tr>
-
                     {% empty %}
-
                     <tr>
-
-                        <td colspan="5" class="empty-state">
-                            No scans recorded yet.
+                        <td colspan="5" style="text-align:center; padding: 4rem; color: var(--ink-3);">
+                            <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--ink-2);">
+                                No scans recorded yet.
+                            </div>
+                            <div class="text-mono" style="font-size: 0.85rem; margin-top: 8px;">Start a network scan from the Overview dashboard to begin tracking.</div>
                         </td>
-
                     </tr>
-
                     {% endfor %}
-
                 </tbody>
-
             </table>
-
         </div>
-
     </div>
 
 </div>

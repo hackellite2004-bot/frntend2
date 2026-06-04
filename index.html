@@ -3,286 +3,221 @@
 {% block title %}Dashboard | Network Monitor{% endblock %}
  
 {% block content %}
- 
 
-
-
- 
-
- 
 <audio id="alert-sound">
     <source src="{% static 'sounds/alert.mp3' %}" type="audio/mpeg">
 </audio>
- 
 
+<div class="d-flex flex-column gap-4 pb-5">
 
- 
-    <!-- ══════════ TOPBAR ══════════ -->
-    <div class="nm-topbar">
-        <div class="nm-brand">
-            <div class="nm-brand-icon">
-                <svg viewBox="0 0 24 24">
-                    <rect x="2" y="2" width="20" height="8" rx="2"/>
-                    <rect x="2" y="14" width="20" height="8" rx="2"/>
-                    <line x1="6" y1="6" x2="6.01" y2="6"/>
-                    <line x1="6" y1="18" x2="6.01" y2="18"/>
-                </svg>
-            </div>
-            <div>
-                <div class="nm-brand-title">Network Scan Dashboard</div>
-                <div class="nm-brand-sub">Active Hosts &amp; Security Alerts</div>
+    <!-- ══════════ QUICK ACTIONS / PAGE HEADER ══════════ -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-2">
+        <div>
+            <h1 class="section-title" style="margin-bottom: 4px;">Network Overview</h1>
+            <div class="section-copy d-flex align-items-center gap-2">
+                <span class="badge-status" style="background: var(--green-light); color: var(--green); border-color: var(--green-glow);">
+                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--green); margin-right:4px;"></span>
+                    Live Polling (3s)
+                </span>
+                Active Hosts &amp; Security Alerts
             </div>
         </div>
-        <div class="nm-topbar-actions">
-            <div class="nm-live-badge">
-                <span class="nm-dot nm-dot--running" style="width:5px;height:5px;"></span>
-                Live
-            </div>
-            <span class="nm-refresh-tick">
-                <span class="nm-refresh-tick-dot"></span>
-                Polling every 3s
-            </span>
-            <a href="{% url 'dashboard:edit_scan_configuration' %}" class="nm-config-btn">
-                <svg viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.07 4.93A10 10 0 0 0 4.93 19.07M4.93 4.93a10 10 0 0 0 14.14 14.14"/>
-                </svg>
-                Configure
+        <div>
+            <a href="{% url 'dashboard:edit_scan_configuration' %}" class="nm-btn" style="background: var(--surface-3); border: 1px solid var(--border); color: var(--ink-2);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Engine Config
             </a>
         </div>
     </div>
- 
+
     <!-- ══════════ STAT CARDS ══════════ -->
-    <div class="nm-stats">
-        <div class="nm-stat nm-stat--default">
-            <div class="nm-stat-accent"></div>
-            <div class="nm-stat-label">Total Hosts</div>
-            <div class="nm-stat-value" id="js-total-devices">{{ total_devices }}</div>
-            <div class="nm-stat-tag">on subnet</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+        <div class="card-shell" style="padding: 1.5rem; position: relative; overflow: hidden;">
+            <div style="position: absolute; top:0; left:0; width:4px; height:100%; background: var(--blue);"></div>
+            <div class="text-mono" style="font-size: 0.75rem; color: var(--ink-3); text-transform: uppercase; margin-bottom: 8px;">Total Hosts</div>
+            <div style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: var(--ink); line-height: 1;" id="js-total-devices">{{ total_devices }}</div>
+            <div class="text-mono" style="font-size: 0.75rem; color: var(--ink-3); margin-top: 8px;">on subnet</div>
         </div>
-        <div class="nm-stat nm-stat--green">
-            <div class="nm-stat-accent"></div>
-            <div class="nm-stat-label">Active Hosts</div>
-            <div class="nm-stat-value" id="js-online-devices">{{ online_devices }}</div>
-            <div class="nm-stat-tag">responding</div>
+        <div class="card-shell" style="padding: 1.5rem; position: relative; overflow: hidden; background: var(--green-light); border-color: var(--green-glow);">
+            <div style="position: absolute; top:0; left:0; width:4px; height:100%; background: var(--green);"></div>
+            <div class="text-mono" style="font-size: 0.75rem; color: var(--green); text-transform: uppercase; margin-bottom: 8px; font-weight: 700;">Active Hosts</div>
+            <div style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: var(--green); line-height: 1;" id="js-online-devices">{{ online_devices }}</div>
+            <div class="text-mono" style="font-size: 0.75rem; color: var(--green); margin-top: 8px; opacity: 0.8;">responding</div>
         </div>
-        <div class="nm-stat nm-stat--red">
-            <div class="nm-stat-accent"></div>
-            <div class="nm-stat-label">Offline Hosts</div>
-            <div class="nm-stat-value" id="js-offline-devices">{{ offline_devices }}</div>
-            <div class="nm-stat-tag">unreachable</div>
+        <div class="card-shell" style="padding: 1.5rem; position: relative; overflow: hidden; background: var(--red-light); border-color: var(--red-glow);">
+            <div style="position: absolute; top:0; left:0; width:4px; height:100%; background: var(--red);"></div>
+            <div class="text-mono" style="font-size: 0.75rem; color: var(--red); text-transform: uppercase; margin-bottom: 8px; font-weight: 700;">Offline Hosts</div>
+            <div style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: var(--red); line-height: 1;" id="js-offline-devices">{{ offline_devices }}</div>
+            <div class="text-mono" style="font-size: 0.75rem; color: var(--red); margin-top: 8px; opacity: 0.8;">unreachable</div>
         </div>
-        <div class="nm-stat nm-stat--cyan">
-            <div class="nm-stat-accent"></div>
-            <div class="nm-stat-label">Devices Scanned</div>
-            <div class="nm-stat-value">{% if latest_scan %}{{ latest_scan.total_devices_found }}{% else %}0{% endif %}</div>
-            <div class="nm-stat-tag">devices found</div>
+        <div class="card-shell" style="padding: 1.5rem; position: relative; overflow: hidden;">
+            <div style="position: absolute; top:0; left:0; width:4px; height:100%; background: var(--cyan);"></div>
+            <div class="text-mono" style="font-size: 0.75rem; color: var(--ink-3); text-transform: uppercase; margin-bottom: 8px;">Devices Scanned</div>
+            <div style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: var(--ink); line-height: 1;">{% if latest_scan %}{{ latest_scan.total_devices_found }}{% else %}0{% endif %}</div>
+            <div class="text-mono" style="font-size: 0.75rem; color: var(--ink-3); margin-top: 8px;">in latest sweep</div>
         </div>
     </div>
- 
+
     {% if configuration %}
- 
     <!-- ══════════ MAIN GRID ══════════ -->
-    <div class="nm-main-grid">
- 
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+        
         <!-- LEFT: CONTROL CARD -->
-        <div class="nm-card">
-            <div class="nm-card-header">
-                <div class="nm-card-title">
-                    <span class="nm-card-title-dot"></span>
-                    Scan Control
+        <div class="card-shell" style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h3 style="font-family: var(--font-display); font-weight: 800; color: var(--ink); font-size: 1.3rem;">Scan Control Center</h3>
+                    <div class="text-mono" style="font-size: 0.8rem; color: var(--ink-3); margin-top: 4px;">Target: <span style="color: var(--blue); font-weight: 600;">{{ configuration.subnet_range }}</span></div>
                 </div>
-                <div class="nm-subnet-tag">{{ configuration.subnet_range }}</div>
-            </div>
- 
-            <!-- STATUS PILL -->
-            <div style="margin-bottom: 1.25rem;">
-                <div style="font-family: var(--font-mono); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 8px;">System Status</div>
-                <div id="js-status-pill" class="nm-status-pill
-                    {% if configuration.heavy_scan_status == 'RUNNING' %}nm-status-pill--heavy
-                    {% elif configuration.light_scan_status == 'RUNNING' %}nm-status-pill--running
-                    {% elif configuration.light_scan_status == 'WAITING' %}nm-status-pill--waiting
-                    {% elif configuration.light_scan_status == 'STOPPING' %}nm-status-pill--waiting
-                    {% else %}nm-status-pill--stopped{% endif %}">
- 
-                    {% if configuration.heavy_scan_status == 'RUNNING' %}
-                        <span class="nm-dot nm-dot--heavy"></span> Heavy scan running
-                    {% elif configuration.light_scan_status == 'RUNNING' %}
-                        <span class="nm-dot nm-dot--running"></span> Light scan running
-                    {% elif configuration.light_scan_status == 'WAITING' %}
-                        <span class="nm-dot nm-dot--waiting"></span> Waiting for next scan
-                    {% elif configuration.light_scan_status == 'STOPPING' %}
-                        <span class="nm-dot nm-dot--waiting"></span> Finishing current scan…
-                    {% else %}
-                        <span class="nm-dot nm-dot--stopped"></span> Idle
-                    {% endif %}
+                <div id="js-status-pill" class="badge-alert" style="background: var(--surface-3); border-color: var(--border-2); padding: 8px 16px;">
+                    <!-- populated by JS -->
+                    Initializing...
                 </div>
             </div>
- 
+
             <!-- PROGRESS -->
-            <div class="nm-progress-wrap">
-                <div class="nm-progress-row">
-                    <span class="nm-progress-name" id="js-progress-label">Scan / Wait Progress</span>
-                    <span class="nm-progress-pct" id="progress-text">0%</span>
+            <div style="background: var(--surface-2); padding: 1.25rem; border-radius: var(--r-md); border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span class="text-mono" id="js-progress-label" style="font-size: 0.8rem; font-weight: 600; color: var(--ink-2);">Engine Idle</span>
+                    <span class="text-mono" id="progress-text" style="font-size: 0.8rem; font-weight: 700; color: var(--blue);">0%</span>
                 </div>
-                <div class="nm-progress-track">
-                    <div id="scan-progress-bar" class="nm-progress-fill"></div>
+                <div style="width: 100%; height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden;">
+                    <div id="scan-progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--blue), var(--cyan)); transition: width 0.3s ease;"></div>
                 </div>
-                </div>
- 
+            </div>
+
             <!-- TIME GRID -->
-            <div class="nm-time-grid">
-                <div class="nm-time-item">
-                    <div class="nm-time-lbl">Last Quick Scan</div>
-                    <div class="nm-time-val" id="js-last-light">
-                        {% if configuration.last_light_scan_finished_at %}
-                            {{ configuration.last_light_scan_finished_at|date:'M d, H:i:s' }}
-                        {% else %}—{% endif %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                <div style="background: var(--surface-3); padding: 1rem; border-radius: var(--r-md);">
+                    <div class="text-mono" style="font-size: 0.7rem; color: var(--ink-3); text-transform: uppercase;">Last Quick Scan</div>
+                    <div class="text-mono" id="js-last-light" style="font-size: 0.85rem; font-weight: 600; color: var(--ink); margin-top: 6px;">
+                        {% if configuration.last_light_scan_finished_at %}{{ configuration.last_light_scan_finished_at|date:'M d, H:i:s' }}{% else %}—{% endif %}
                     </div>
                 </div>
-                <div class="nm-time-item">
-                    <div class="nm-time-lbl">Last Deep Scan</div>
-                    <div class="nm-time-val" id="js-last-heavy">
-                        {% if configuration.last_heavy_scan_finished_at %}
-                            {{ configuration.last_heavy_scan_finished_at|date:'M d, H:i:s' }}
-                        {% else %}—{% endif %}
+                <div style="background: var(--surface-3); padding: 1rem; border-radius: var(--r-md);">
+                    <div class="text-mono" style="font-size: 0.7rem; color: var(--ink-3); text-transform: uppercase;">Last Deep Scan</div>
+                    <div class="text-mono" id="js-last-heavy" style="font-size: 0.85rem; font-weight: 600; color: var(--ink); margin-top: 6px;">
+                        {% if configuration.last_heavy_scan_finished_at %}{{ configuration.last_heavy_scan_finished_at|date:'M d, H:i:s' }}{% else %}—{% endif %}
                     </div>
                 </div>
-                <div class="nm-time-item">
-                    <div class="nm-time-lbl">Next Scan</div>
-                    <div class="nm-time-val" id="js-next-scan">
-                        {% if configuration.next_light_scan_time %}
-                            {{ configuration.next_light_scan_time|date:'M d, H:i:s' }}
-                        {% else %}Waiting…{% endif %}
+                <div style="background: var(--surface-3); padding: 1rem; border-radius: var(--r-md); border-bottom: 2px solid var(--blue);">
+                    <div class="text-mono" style="font-size: 0.7rem; color: var(--ink-3); text-transform: uppercase;">Next Scan Scheduled</div>
+                    <div class="text-mono" id="js-next-scan" style="font-size: 0.85rem; font-weight: 600; color: var(--blue); margin-top: 6px;">
+                        {% if configuration.next_light_scan_time %}{{ configuration.next_light_scan_time|date:'M d, H:i:s' }}{% else %}Waiting…{% endif %}
                     </div>
                 </div>
             </div>
- 
+
             <!-- ACTIONS -->
-            <div class="nm-actions">
+            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
                 <form action="{% url 'dashboard:start_scan' %}" method="post" style="display:contents">
                     {% csrf_token %}
-                    <button id="js-start-btn" class="nm-btn nm-btn--primary"
-                        {% if configuration.light_scan_status == 'RUNNING' or configuration.light_scan_status == 'WAITING' %}disabled{% endif %}>
-                        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
-                        Start Scan
+                    <button id="js-start-btn" class="nm-btn nm-btn--primary" style="flex: 1;" {% if configuration.light_scan_status == 'RUNNING' or configuration.light_scan_status == 'WAITING' %}disabled{% endif %}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Initiate Manual Scan
                     </button>
                 </form>
                 <form action="{% url 'dashboard:stop_scan' %}" method="post" style="display:contents">
                     {% csrf_token %}
-                    <button class="nm-btn nm-btn--ghost">
-                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" stroke="none"/></svg>
-                        Stop After Current
+                    <button class="nm-btn" style="background: var(--surface-2); border: 1px solid var(--border); color: var(--red);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                        Stop Engine
                     </button>
                 </form>
             </div>
         </div>
- 
+
         <!-- RIGHT: SIDE PANEL -->
-        <div class="nm-side-panel">
- 
-            <!-- Scan summary dark card -->
-            <div class="nm-scan-info">
-                <div class="nm-scan-info-label">Latest Scan Results</div>
-                <div class="nm-scan-info-value">
-                    {% if latest_scan %}{{ latest_scan.total_devices_found }}{% else %}0{% endif %}
-                </div>
-                <div class="nm-scan-info-sub">devices found</div>
-                <div class="nm-scan-divider"></div>
-                <div class="nm-scan-row">
-                    <span class="nm-scan-row-label">Subnet</span>
-                    <span class="nm-scan-row-val">{{ configuration.subnet_range }}</span>
-                </div>
-                <div class="nm-scan-row">
-                    <span class="nm-scan-row-label">Interval</span>
-                    <span class="nm-scan-row-val">{{ configuration.light_scan_interval_minutes }}m</span>
-                </div>
-                <div class="nm-scan-row">
-                    <span class="nm-scan-row-label">Heavy every</span>
-                    <span class="nm-scan-row-val">{{ configuration.heavy_scan_interval_light_cycles }} light cycles</span>
-                </div>
-            </div>
- 
-            </div>
-        </div>
-    </div>
-    </div>
- 
-    {% endif %}
- 
-    <!-- ══════════ LATEST ALERTS ══════════ -->
-    <div class="nm-section-divider">
-        <div class="nm-section-divider-line"></div>
-        <div class="nm-section-divider-label">Scan Alerts &amp; Security Events</div>
-        <div class="nm-section-divider-line"></div>
-    </div>
- 
-    <div class="nm-alerts-header">
-        <div class="nm-alerts-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-            Active Alerts
-            <span class="nm-badge-count" id="js-alert-count">{{ total_alerts }}</span>
-        </div>
-        <a href="/alerts/" class="nm-config-btn">View All →</a>
-    </div>
- 
-    <div class="nm-alert-list" id="js-alert-list">
-        {% for alert in latest_alerts %}
-        <div class="nm-alert-row nm-alert-row--{% if alert.severity == 'HIGH' or alert.risk_level == 'high' %}high{% elif alert.severity == 'MEDIUM' or alert.risk_level == 'medium' %}medium{% elif alert.severity == 'LOW' or alert.risk_level == 'low' %}low{% else %}info{% endif %}">
-            <div class="nm-alert-icon">
-                {% if alert.severity == 'HIGH' or alert.risk_level == 'high' %}🔴
-                {% elif alert.severity == 'MEDIUM' or alert.risk_level == 'medium' %}🟡
-                {% elif alert.severity == 'LOW' or alert.risk_level == 'low' %}🟢
-                {% else %}🔵{% endif %}
-            </div>
-            <div class="nm-alert-body">
+        <div class="card-shell" style="background: linear-gradient(180deg, var(--blue-dim) 0%, var(--ink) 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; flex-direction: column; height: 100%;">
+                <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Engine Configuration</div>
                 
-                <div class="nm-alert-desc">{{ alert.description }}</div>
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    <div>
+                        <div class="text-mono" style="font-size: 0.75rem; color: var(--cyan); text-transform: uppercase; margin-bottom: 4px;">Target Subnet</div>
+                        <div style="font-family: var(--font-display); font-size: 1.2rem; font-weight: 600;">{{ configuration.subnet_range }}</div>
+                    </div>
+                    <div style="height: 1px; background: rgba(255,255,255,0.1);"></div>
+                    <div>
+                        <div class="text-mono" style="font-size: 0.75rem; color: var(--cyan); text-transform: uppercase; margin-bottom: 4px;">Quick Interval</div>
+                        <div style="font-family: var(--font-display); font-size: 1.2rem; font-weight: 600;">{{ configuration.light_scan_interval_minutes }} minute(s)</div>
+                    </div>
+                    <div style="height: 1px; background: rgba(255,255,255,0.1);"></div>
+                    <div>
+                        <div class="text-mono" style="font-size: 0.75rem; color: var(--cyan); text-transform: uppercase; margin-bottom: 4px;">Deep Sweep Frequency</div>
+                        <div style="font-family: var(--font-display); font-size: 1.2rem; font-weight: 600;">Every {{ configuration.heavy_scan_interval_light_cycles }} quick scans</div>
+                    </div>
+                </div>
             </div>
-            <div class="nm-alert-time">{{ alert.created_at|date:'M d, H:i' }}</div>
         </div>
-        {% empty %}
-        <div class="nm-empty-alerts">
-            ✓ No Threat Found
-        </div>
-        {% endfor %}
     </div>
- 
+    {% endif %}
+
+    <!-- ══════════ ALERTS SECTION ══════════ -->
+    <div style="margin-top: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
+            <h2 style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--ink);">Security Intelligence Log</h2>
+            <a href="/alerts/" class="nm-btn" style="background: var(--surface); border: 1px solid var(--border); font-size: 0.85rem;">View All Alerts →</a>
+        </div>
+
+        <div id="js-alert-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            {% for alert in latest_alerts %}
+            
+            {% with sev=alert.severity|default:alert.risk_level|default:"INFO"|lower %}
+            {% if sev == "high" %}{% setvar cls "table-danger" %}{% setvar badge_bg "var(--red-light)" %}{% setvar badge_col "var(--red)" %}{% setvar icon "🔴" %}
+            {% elif sev == "medium" %}{% setvar cls "table-warning" %}{% setvar badge_bg "var(--amber-light)" %}{% setvar badge_col "var(--amber)" %}{% setvar icon "🟡" %}
+            {% elif sev == "low" %}{% setvar cls "table-success" %}{% setvar badge_bg "var(--green-light)" %}{% setvar badge_col "var(--green)" %}{% setvar icon "🟢" %}
+            {% else %}{% setvar cls "table-secondary" %}{% setvar badge_bg "var(--blue-glow)" %}{% setvar badge_col "var(--blue)" %}{% setvar icon "🔵" %}
+            {% endif %}
+
+            <div class="card-shell" style="padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; border-left: 4px solid {{ badge_col }};">
+                <div style="font-size: 1.5rem;">{{ icon }}</div>
+                <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span class="badge-status" style="background: {{ badge_bg }}; color: {{ badge_col }}; font-size: 0.7rem;">{{ sev|upper }}</span>
+                        <span style="font-family: var(--font-display); font-weight: 700; color: var(--ink);">{{ alert.type|default:alert.alert_type|default:"Alert" }}</span>
+                    </div>
+                    <div style="font-family: var(--font-body); font-size: 0.9rem; color: var(--ink-2);">{{ alert.description }}</div>
+                </div>
+                <div class="text-mono" style="font-size: 0.85rem; color: var(--ink-3);">
+                    {{ alert.created_at|date:'M d, H:i' }}
+                </div>
+            </div>
+            {% endwith %}
+
+            {% empty %}
+            <div class="card-shell" style="padding: 3rem; text-align: center; border: 1px dashed var(--border-2); background: var(--surface-2);">
+                <div style="font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--green); margin-bottom: 8px;">✓ Network Secure</div>
+                <div class="text-mono" style="color: var(--ink-3); font-size: 0.9rem;">No threats or anomalies detected in the recent logs.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
-</div>
- 
-<!-- ══════════ ALERT POPUP ══════════ -->
-<div id="alert-popup" class="nm-alert-popup hidden">
-    <div class="nm-alert-popup-bar"></div>
-    <div class="nm-alert-popup-inner">
-        <div class="nm-alert-popup-header">
-            <div class="nm-alert-popup-icon">⚠️</div>
+
+<!-- ══════════ ALERT POPUP (PERSISTENT) ══════════ -->
+<div id="alert-popup" class="card-shell hidden" style="position: fixed; bottom: 2rem; right: 2rem; width: 400px; max-width: 90vw; z-index: 9999; border: 1px solid var(--red-glow); background: #fff; box-shadow: 0 20px 40px rgba(220,38,38,0.15); border-top: 4px solid var(--red); padding: 0; overflow: hidden; display: none;">
+    <div style="padding: 1.25rem; border-bottom: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 1.5rem;">⚠️</div>
             <div>
-                <div class="nm-alert-popup-title">Security Alerts Found</div>
-                <div class="nm-alert-popup-sub" id="popup-scan-sub">From latest scan</div>
+                <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: var(--red);">Security Alerts Found</div>
+                <div class="text-mono" style="font-size: 0.75rem; color: var(--ink-3);" id="popup-scan-sub">From latest scan</div>
             </div>
         </div>
- 
-        <div id="alert-popup-list"></div>
- 
-        <div class="nm-alert-popup-actions">
-            <a href="/alerts/" class="nm-btn nm-btn--primary" style="flex:1; justify-content:center;">
-                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                View Alerts
-            </a>
-            <button onclick="closeAlertPopup()" class="nm-btn nm-btn--ghost">
-                Dismiss
-            </button>
-        </div>
+    </div>
+    <div id="alert-popup-list" style="max-height: 250px; overflow-y: auto; background: var(--surface-2);"></div>
+    <div style="padding: 1rem; display: flex; gap: 1rem; background: #fff; border-top: 1px solid var(--border);">
+        <a href="/alerts/" class="nm-btn nm-btn--primary" style="flex: 1; justify-content: center; background: var(--red); box-shadow: none;">Review Threats</a>
+        <button onclick="closeAlertPopup()" class="nm-btn" style="background: var(--surface-3); border: 1px solid var(--border); color: var(--ink-2);">Dismiss</button>
     </div>
 </div>
- 
+
+<style>
+.hidden { display: none !important; }
+</style>
+
 <script>
- 
 const POLL_URL      = "{% url 'dashboard:status' %}";
 const ALERTS_URL    = "{% url 'alerts:latest_alerts' %}";
  
@@ -310,8 +245,6 @@ function setProgressBar(startIso, durationSeconds, label) {
     if (countdownTimer) clearInterval(countdownTimer);
  
     const labelEl    = document.getElementById("js-progress-label");
-    const countdownEl = document.getElementById("js-countdown");
-    const countdownVal = document.getElementById("js-countdown-val");
  
     if (labelEl && label) labelEl.textContent = label;
  
@@ -324,20 +257,6 @@ function setProgressBar(startIso, durationSeconds, label) {
         if (bar)  bar.style.width  = percent + "%";
         if (text) text.textContent = Math.floor(percent) + "%";
     }, 500);
- 
-    // countdown overlay (for waiting state)
-    if (label && label.toLowerCase().includes('wait')) {
-        countdownEl.style.display = 'block';
-        countdownTimer = setInterval(() => {
-            const remaining = Math.max(0, Math.ceil((start + duration - Date.now()) / 1000));
-            const m = Math.floor(remaining / 60);
-            const s = remaining % 60;
-            countdownVal.textContent = `${m}:${s.toString().padStart(2,'0')}`;
-            if (remaining === 0) clearInterval(countdownTimer);
-        }, 500);
-    } else {
-        countdownEl.style.display = 'none';
-    }
 }
  
 function clearProgressBar() {
@@ -348,10 +267,8 @@ function clearProgressBar() {
  
     const bar  = document.getElementById("scan-progress-bar");
     const text = document.getElementById("progress-text");
-    const cd   = document.getElementById("js-countdown");
     if (bar)  bar.style.width  = "0%";
     if (text) text.textContent = "0%";
-    if (cd)   cd.style.display = "none";
 }
  
 // ─── Status pill ─────────────────────────────────────────────
@@ -359,40 +276,22 @@ function updateStatusText(light, heavy) {
     const el = document.getElementById('js-status-pill');
     if (!el) return;
  
-    const dot = (cls) => `<span class="nm-dot nm-dot--${cls}"></span>`;
- 
-    let cls  = 'stopped';
-    let text = 'Idle';
+    let bg = 'var(--surface-3)', col = 'var(--ink-3)', border = 'var(--border-2)', text = 'System Idle';
  
     if (heavy === 'RUNNING') {
-        cls  = 'heavy';
-        text = 'Heavy scan running';
+        bg = 'var(--blue-glow)'; col = 'var(--blue)'; border = 'rgba(11,54,101,0.2)'; text = 'Deep Scan Running';
     } else if (light === 'RUNNING') {
-        cls  = 'running';
-        text = 'Light scan running';
-    } else if (light === 'WAITING') {
-        cls  = 'waiting';
-        text = 'Waiting for next scan';
-    } else if (light === 'STOPPING') {
-        cls  = 'waiting';
-        text = 'Finishing current scan…';
-    } else if (light === 'STOPPED') {
-        cls  = 'stopped';
-        text = 'Monitoring stopped';
+        bg = 'var(--cyan-glow)'; col = 'var(--cyan)'; border = 'rgba(249,129,37,0.2)'; text = 'Quick Scan Running';
+    } else if (light === 'WAITING' || light === 'STOPPING') {
+        bg = 'var(--amber-light)'; col = 'var(--amber)'; border = 'var(--amber-glow)'; text = 'Engine Waiting';
     } else if (light === 'FAILED' || light === 'ERROR') {
-        cls  = 'error';
-        text = 'Scan failed';
+        bg = 'var(--red-light)'; col = 'var(--red)'; border = 'var(--red-glow)'; text = 'Engine Error';
     }
  
-    el.innerHTML = dot(cls) + ' ' + text;
- 
-    // pill colour class
-    el.className = 'nm-status-pill';
-    if (cls === 'running') el.classList.add('nm-status-pill--running');
-    else if (cls === 'heavy')   el.classList.add('nm-status-pill--heavy');
-    else if (cls === 'waiting') el.classList.add('nm-status-pill--waiting');
-    else if (cls === 'error')   el.classList.add('nm-status-pill--error');
-    else                        el.classList.add('nm-status-pill--stopped');
+    el.innerHTML = `<span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${col}; margin-right:6px; box-shadow: 0 0 8px ${col};"></span><span style="font-weight:700;">${text}</span>`;
+    el.style.background = bg;
+    el.style.color = col;
+    el.style.borderColor = border;
 }
  
 // ─── Start button ────────────────────────────────────────────
@@ -425,24 +324,6 @@ function updateTimes(data) {
     set('js-next-scan',  data.next_light_scan_time ? fmtIso(data.next_light_scan_time) : 'Waiting…');
 }
  
-// ─── Cycles ring ─────────────────────────────────────────────
-function updateRing(data) {
-    const completed = data.completed_light_scan_cycles || 0;
-    const total     = data.heavy_scan_interval_light_cycles || HEAVY_CYCLES_TOTAL;
-    const remaining = Math.max(0, total - completed);
-    const pct       = total > 0 ? completed / total : 0;
-    const circumference = 251.2;
-    const offset = circumference - (pct * circumference);
- 
-    const ring    = document.getElementById('js-ring-fill');
-    const numEl   = document.getElementById('js-ring-num');
-    const descEl  = document.getElementById('js-ring-num-desc');
- 
-    if (ring)   ring.style.strokeDashoffset = offset;
-    if (numEl)  numEl.textContent  = remaining;
-    if (descEl) descEl.textContent = remaining;
-}
- 
 // ─── Main poll ───────────────────────────────────────────────
 function poll() {
     fetch(POLL_URL)
@@ -455,19 +336,18 @@ function poll() {
             updateStartButton(light);
             updateDeviceCounts(data);
             updateTimes(data);
-            updateRing(data);
  
             if (heavy === 'RUNNING' && data.current_heavy_scan_started_at) {
                 setProgressBar(
                     data.current_heavy_scan_started_at,
                     (data.estimated_minimum_scan_seconds || ESTIMATED_SCAN_SECONDS) * 3,
-                    'Heavy Scan Progress'
+                    'Deep Scan Progress'
                 );
             } else if (light === 'RUNNING' && data.current_light_scan_started_at) {
                 setProgressBar(
                     data.current_light_scan_started_at,
                     data.estimated_minimum_scan_seconds || ESTIMATED_SCAN_SECONDS,
-                    'Light Scan Progress'
+                    'Quick Scan Progress'
                 );
             } else if (light === 'WAITING' && data.last_light_scan_finished_at) {
                 setProgressBar(
@@ -488,6 +368,7 @@ let popupScanId = null;
  
 function closeAlertPopup() {
     document.getElementById("alert-popup").classList.add("hidden");
+    document.getElementById("alert-popup").style.display = "none";
     popupOpen = false;
     localStorage.removeItem("persistentPopupAlerts");
     localStorage.removeItem("persistentPopupScanId");
@@ -502,20 +383,23 @@ function showAlertPopup(alerts, scanId) {
     alerts.forEach(alert => {
         const timeStr = alert.created_at ? new Date(alert.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
         const severity = alert.severity || alert.risk_level || 'INFO';
+        const color = severity === 'HIGH' ? 'var(--red)' : severity === 'MEDIUM' ? 'var(--amber)' : severity === 'LOW' ? 'var(--green)' : 'var(--blue)';
+        
         list.innerHTML += `
-            <div class="nm-popup-alert-item">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                    <span class="nm-popup-alert-type"><span class="nm-alert-severity-badge sev-${severity.toLowerCase()}">${severity.toUpperCase()}</span> ${alert.type || alert.alert_type || "Alert"}</span>
-                    <span class="nm-alert-time" style="font-size:0.6rem;">${timeStr}</span>
+            <div style="padding: 1rem; border-bottom: 1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span class="badge-status" style="background: var(--surface); color: ${color}; font-size: 0.65rem; border: 1px solid ${color};">${severity.toUpperCase()}</span>
+                    <span class="text-mono" style="font-size:0.7rem; color: var(--ink-3);">${timeStr}</span>
                 </div>
-                <div class="nm-popup-alert-desc">${alert.description || ''}</div>
+                <div style="font-family: var(--font-body); font-size: 0.85rem; color: var(--ink-2); font-weight: 500;">${alert.description || ''}</div>
             </div>
         `;
     });
  
-    if (sub) sub.textContent = `Scan #${scanId} · ${alerts.length} alert${alerts.length > 1 ? 's' : ''}`;
+    if (sub) sub.textContent = `Scan #${scanId} · ${alerts.length} threat${alerts.length > 1 ? 's' : ''}`;
  
     popup.classList.remove("hidden");
+    popup.style.display = "block";
     popupOpen  = true;
     popupScanId = scanId;
  
@@ -557,35 +441,6 @@ function pollAlerts() {
         .catch(err => console.error('Alert poll failed:', err));
 }
  
-function refreshInlineAlerts(alerts) {
-    const list = document.getElementById("js-alert-list");
-    if (!list) return;
- 
-    const countEl = document.getElementById("js-alert-count");
-    if (countEl) countEl.textContent = alerts.length;
- 
-    if (!alerts.length) {
-        list.innerHTML = `<div class="nm-empty-alerts">✓ No Threat Found</div>`;
-        return;
-    }
- 
-    list.innerHTML = alerts.map(a => {
-        const sev = (a.severity || a.risk_level || 'info').toLowerCase();
-        const cls = ['high','medium','low'].includes(sev) ? sev : 'info';
-        const icon = cls === 'high' ? '🔴' : cls === 'medium' ? '🟡' : cls === 'low' ? '🟢' : '🔵';
-        return `
-            <div class="nm-alert-row nm-alert-row--${cls}">
-                <div class="nm-alert-icon">${icon}</div>
-                <div class="nm-alert-body">
-                    <div class="nm-alert-type"><span class="nm-alert-severity-badge sev-${cls}">${sev.toUpperCase()}</span> ${a.type || a.alert_type || "Alert"}</div>
-                    <div class="nm-alert-desc">${a.description || ''}</div>
-                </div>
-                <div class="nm-alert-time">${a.created_at ? new Date(a.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</div>
-            </div>
-        `;
-    }).join('');
-}
- 
 // ─── Init ────────────────────────────────────────────────────
  
 // Check persistent alerts from localStorage
@@ -608,18 +463,12 @@ fetch(ALERTS_URL)
             lastScanId = currentScan;
             localStorage.setItem("lastScanId", currentScan);
         }
-        
-        // Ensure inline list is updated
-        if (data.alerts) {
-            refreshInlineAlerts(data.alerts);
-        }
     })
     .catch(() => {});
  
 poll();
 setInterval(poll,        3000);
 setInterval(pollAlerts,  3000);
- 
 </script>
  
 {% endblock %}

@@ -4,67 +4,65 @@
 
 {% block content %}
 
-
 <div class="d-flex flex-column gap-3">
 
-    <div class="ent-card mb-3">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+    <!-- HEADER -->
+    <div class="section-header" style="margin-bottom: 1rem;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
-                <h1 class="section-title">Devices</h1>
+                <h1 class="section-title">Active Devices & Hosts</h1>
+                <div class="section-copy">Comprehensive inventory of all detected network devices.</div>
             </div>
-
-            <div class="device-count">
-                {{ devices|length }} Active Entries
+            <div>
+                <span class="badge-alert" style="background: var(--blue-glow); color: var(--blue); border: 1px solid rgba(11,54,101,0.25); font-size: 0.85rem;">
+                    {{ devices|length }} Active Entries
+                </span>
             </div>
         </div>
     </div>
 
-    <div class="d-flex flex-wrap gap-2 mt-2 mb-2 align-items-center">
+    <!-- FILTERS -->
+    <div class="card-shell" style="padding: 1rem 1.5rem; margin-bottom: 1rem;">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            
+            <span class="text-mono" style="font-size: 0.75rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-right: 8px;">Filter by:</span>
 
-        <button class="btn btn-sm btn-light tab-btn active"
-                data-filter="ALL">
-            All ({{ devices|length }})
-        </button>
+            <button class="nm-btn tab-btn active" data-filter="ALL" style="padding: 6px 12px; font-size: 0.8rem; background: var(--surface-3); border: 1px solid var(--border); color: var(--ink);">
+                All ({{ devices|length }})
+            </button>
 
-        <button class="btn btn-sm btn-light tab-btn"
-                data-filter="AUTHORIZED">
-            Authorized
-        </button>
+            <button class="nm-btn tab-btn" data-filter="AUTHORIZED" style="padding: 6px 12px; font-size: 0.8rem; background: var(--surface-3); border: 1px solid var(--border); color: var(--ink);">
+                Authorized
+            </button>
 
-        <button class="btn btn-sm btn-light tab-btn"
-                data-filter="UNAUTHORIZED">
-            Unauthorized
-        </button>
+            <button class="nm-btn tab-btn" data-filter="UNAUTHORIZED" style="padding: 6px 12px; font-size: 0.8rem; background: var(--surface-3); border: 1px solid var(--border); color: var(--ink);">
+                Unauthorized
+            </button>
 
-        <button class="btn btn-sm btn-light tab-btn"
-                data-filter="REJECTED">
-            Rejected
-        </button>
+            <button class="nm-btn tab-btn" data-filter="REJECTED" style="padding: 6px 12px; font-size: 0.8rem; background: var(--surface-3); border: 1px solid var(--border); color: var(--ink);">
+                Rejected
+            </button>
 
-        <button class="btn btn-sm btn-light tab-btn"
-                data-filter="FLAGGED">
-            Flagged
-        </button>
+            <button class="nm-btn tab-btn" data-filter="FLAGGED" style="padding: 6px 12px; font-size: 0.8rem; background: var(--surface-3); border: 1px solid var(--border); color: var(--ink);">
+                Flagged
+            </button>
 
-        <div style="width:1px;height:28px;background:rgba(148,163,184,0.4);margin:0 6px;"></div>
+            <div style="width:1px;height:24px;background:var(--border-2);margin:0 8px;"></div>
 
-        <button class="btn btn-sm btn-outline-secondary tab-btn"
-                data-filter="ONLINE">
-            Online
-        </button>
+            <button class="nm-btn tab-btn" data-filter="ONLINE" style="padding: 6px 12px; font-size: 0.8rem; background: var(--green-light); border: 1px solid var(--green-glow); color: var(--green);">
+                Online
+            </button>
 
-        <button class="btn btn-sm btn-outline-secondary tab-btn"
-                data-filter="OFFLINE">
-            Offline
-        </button>
-
+            <button class="nm-btn tab-btn" data-filter="OFFLINE" style="padding: 6px 12px; font-size: 0.8rem; background: var(--surface-3); border: 1px solid var(--border); color: var(--ink-3);">
+                Offline
+            </button>
+        </div>
     </div>
 
+    <!-- TABLE -->
     <div class="ent-table-wrapper">
         <div class="table-scroll">
-
-            <table class="ent-table">
-
+            <table class="table">
                 <thead>
                     <tr>
                         <th>MAC Address</th>
@@ -77,381 +75,231 @@
                         <th>Security</th>
                     </tr>
                 </thead>
-
                 <tbody>
-
                     {% for device in devices %}
-
-                    <tr
-                        class="
-                            device-row
-
-                            {% if device.risk_score >= 60 %}
-                                risk-high
-
-                            {% elif device.risk_score >= 30 %}
-                                risk-medium
-
-                            {% else %}
-                                risk-low
-
-                            {% endif %}
-                        "
-
-                        data-device-id="{{ device.id }}"
-                        data-status="{{ device.status }}"
-                        data-online="{{ device.is_online }}"
-                        style="cursor:pointer;"
-                    >
-
-                        <td>
-                            <span class="mac-text">
-                                {{ device.mac_address }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <span class="ip-pill">
-                                {{ device.ip_address }}
-                            </span>
-                        </td>
-
-                        <td>
-                            {{ device.hostname|default:'Unknown' }}
-                        </td>
-
-                        <td>
-                            <span class="vendor-accent">
-                                {{ device.vendor|default:'Unknown' }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <span class="os-muted">
-                                {{ device.operating_system|default:'Unknown' }}
-                            </span>
-                        </td>
-
+                    <tr class="device-row" data-device-id="{{ device.id }}" data-status="{{ device.status }}" data-online="{{ device.is_online }}" style="cursor:pointer;">
+                        
+                        <td><span class="mac-text">{{ device.mac_address }}</span></td>
+                        
+                        <td><span class="ip-text" style="background: var(--surface-2);">{{ device.ip_address }}</span></td>
+                        
+                        <td style="font-weight: 600; color: var(--ink);">{{ device.hostname|default:'Unknown' }}</td>
+                        
+                        <td><span style="font-size: 0.85rem; color: var(--ink-2);">{{ device.vendor|default:'Unknown' }}</span></td>
+                        
+                        <td><span class="text-mono" style="font-size: 0.8rem; color: var(--ink-3);">{{ device.operating_system|default:'Unknown' }}</span></td>
+                        
                         <td>
                             {% if device.is_online %}
-                                <span class="badge-status badge-online">
-                                    Online
-                                </span>
+                                <span class="badge-status" style="background: var(--green-light); color: var(--green); border-color: var(--green-glow);">Online</span>
                             {% else %}
-                                <span class="badge-status badge-offline">
-                                    Offline
-                                </span>
+                                <span class="badge-status" style="background: var(--surface-3); color: var(--ink-3); border-color: var(--border-2);">Offline</span>
                             {% endif %}
                         </td>
-
-                        <td class="last-seen">
-                            {{ device.last_seen|date:'M d, Y · H:i' }}
-                        </td>
-
+                        
+                        <td class="text-mono" style="font-size: 0.8rem; color: var(--ink-3);">{{ device.last_seen|date:'M d, Y · H:i' }}</td>
+                        
                         <td>
-                            <button class="btn btn-sm btn-outline-primary"
-                                    onclick="event.stopPropagation(); checkSecurity({{ device.id }})">
+                            <button class="nm-btn" style="padding: 6px 12px; font-size: 0.75rem; background: var(--surface-2); border: 1px solid var(--border); color: var(--blue);" onclick="event.stopPropagation(); checkSecurity({{ device.id }})">
                                 Check Security
                             </button>
                         </td>
-
                     </tr>
-
                     {% empty %}
-
                     <tr>
-                        <td colspan="8" style="text-align:center; padding: 3rem; color: var(--ent-ink-light);">
-                            No devices have been discovered yet.
+                        <td colspan="8" style="text-align:center; padding: 4rem; color: var(--ink-3);">
+                            <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--ink-2);">
+                                No devices have been discovered yet.
+                            </div>
+                            <div class="text-mono" style="font-size: 0.85rem; margin-top: 8px;">Run a network scan to populate this list.</div>
                         </td>
                     </tr>
-
                     {% endfor %}
-
                 </tbody>
-
             </table>
-
         </div>
     </div>
-
 </div>
 
 <!-- DEVICE MODAL -->
-<div class="modal fade"
-     id="deviceModal"
-     tabindex="-1">
-
+<div class="modal fade" id="deviceModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-
-        <div class="modal-content custom-modal">
-
-            <div class="modal-header border-0">
-
-                <h5 class="modal-title">
-                    Device Details
-                </h5>
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                </button>
-
+        <div class="modal-content card-shell" style="padding: 0; overflow: hidden; border: 1px solid var(--border);">
+            
+            <div class="modal-header border-0" style="background: var(--surface-3); padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border) !important;">
+                <h5 class="modal-title" style="font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; color: var(--ink);">Device Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body">
-
-                <div id="deviceDetails">
+            <div class="modal-body" style="padding: 1.5rem;">
+                <div id="deviceDetails" class="d-flex flex-column gap-3">
                     <!-- populated by JS -->
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
 
+<!-- SECURITY MODAL -->
+<div class="modal fade" id="securityModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content card-shell" style="padding: 0; overflow: hidden; border: 1px solid var(--border);">
+            
+            <div class="modal-header border-0" style="background: var(--blue); padding: 1.25rem 1.5rem;">
+                <h5 class="modal-title" style="font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; color: #fff;">Security Report</h5>
+                <button type="button" class="btn-close btn-close-white" onclick="closeModal()"></button>
+            </div>
 
-
-<div id="securityModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <div id="modalText" class="report-box"></div>
-  </div>
+            <div class="modal-body" style="padding: 1.5rem;">
+                <div id="modalText" style="font-family: var(--font-body); font-size: 0.95rem; line-height: 1.6; color: var(--ink-2);"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
 <script>
 
 document.addEventListener('DOMContentLoaded', () => {
-
     let currentFilter = "ALL";
-
-    const rows =
-        document.querySelectorAll('.device-row');
-
-    const tabs =
-        document.querySelectorAll('.tab-btn');
+    const rows = document.querySelectorAll('.device-row');
+    const tabs = document.querySelectorAll('.tab-btn');
 
     function applyFilter() {
-
         rows.forEach(row => {
-
-            const status =
-                row.dataset.status;
-
-            const online =
-                row.dataset.online === "True";
-
+            const status = row.dataset.status;
+            const online = row.dataset.online === "True";
             let show = true;
 
-            if (currentFilter === "ONLINE") {
-                show = online;
-            }
+            if (currentFilter === "ONLINE") { show = online; }
+            else if (currentFilter === "OFFLINE") { show = !online; }
+            else if (currentFilter !== "ALL") { show = status === currentFilter; }
 
-            else if (currentFilter === "OFFLINE") {
-                show = !online;
-            }
-
-            else if (currentFilter !== "ALL") {
-                show = status === currentFilter;
-            }
-
-            row.style.display =
-                show ? "" : "none";
+            row.style.display = show ? "" : "none";
         });
     }
 
     tabs.forEach(tab => {
-
         tab.addEventListener('click', () => {
-
-            tabs.forEach(t =>
-                t.classList.remove('active')
-            );
+            tabs.forEach(t => {
+                t.classList.remove('active');
+                t.style.borderColor = 'var(--border)';
+                t.style.boxShadow = 'none';
+            });
 
             tab.classList.add('active');
-
-            currentFilter =
-                tab.dataset.filter;
-
+            tab.style.borderColor = 'var(--blue)';
+            tab.style.boxShadow = '0 0 0 2px var(--blue-glow)';
+            
+            currentFilter = tab.dataset.filter;
             applyFilter();
         });
     });
 
     rows.forEach(row => {
-
         row.addEventListener('click', async () => {
-
             try {
-
-                const deviceId =
-                    row.dataset.deviceId;
-
-                const response =
-                    await fetch(`/devices/${deviceId}/details/`);
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch device details');
-                }
-
-                const data =
-                    await response.json();
-
+                const deviceId = row.dataset.deviceId;
+                const response = await fetch(`/devices/${deviceId}/details/`);
+                if (!response.ok) throw new Error('Failed to fetch device details');
+                
+                const data = await response.json();
+                
                 document.getElementById('deviceDetails').innerHTML = `
-
-                    <div class="detail-row">
-                        <div class="detail-label">MAC Address</div>
-                        <div class="detail-value mac-text">${data.mac_address || 'Unknown'}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">IP Address</div>
-                        <div class="detail-value">${data.ip_address || 'Unknown'}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">Hostname</div>
-                        <div class="detail-value">${data.hostname || 'Unknown'}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">Vendor</div>
-                        <div class="detail-value">${data.vendor || 'Unknown'}</div>
-                    </div>
-
-
-                    <div class="detail-row">
-                        <div class="detail-label">Device Type</div>
-                        <div class="detail-value">${data.device_type || 'Unknown'}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">Operating System</div>
-                        <div class="detail-value">${data.operating_system || 'Unknown'}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">Open Ports</div>
-
-                        <div class="detail-value">
-
-                            ${
-                                Array.isArray(data.open_ports) && data.open_ports.length
-                                ? data.open_ports.map(p => `
-                                    <div class="port-line">
-                                        ${p.port} (${p.service || 'unknown'})
-                                    </div>
-                                `).join('')
-                                : 'Unknown'
-                            }
-
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="card-shell" style="padding: 1rem;">
+                            <div class="text-mono" style="font-size: 0.7rem; color: var(--ink-3); text-transform: uppercase;">MAC Address</div>
+                            <div class="mac-text mt-1">${data.mac_address || 'Unknown'}</div>
+                        </div>
+                        <div class="card-shell" style="padding: 1rem;">
+                            <div class="text-mono" style="font-size: 0.7rem; color: var(--ink-3); text-transform: uppercase;">IP Address</div>
+                            <div class="ip-text mt-1">${data.ip_address || 'Unknown'}</div>
+                        </div>
+                        <div class="card-shell" style="padding: 1rem;">
+                            <div class="text-mono" style="font-size: 0.7rem; color: var(--ink-3); text-transform: uppercase;">Hostname</div>
+                            <div style="font-weight: 700; color: var(--ink); margin-top: 4px;">${data.hostname || 'Unknown'}</div>
+                        </div>
+                        <div class="card-shell" style="padding: 1rem;">
+                            <div class="text-mono" style="font-size: 0.7rem; color: var(--ink-3); text-transform: uppercase;">Vendor</div>
+                            <div style="font-weight: 600; color: var(--ink-2); margin-top: 4px;">${data.vendor || 'Unknown'}</div>
+                        </div>
+                        <div class="card-shell" style="padding: 1rem;">
+                            <div class="text-mono" style="font-size: 0.7rem; color: var(--ink-3); text-transform: uppercase;">Device Type</div>
+                            <div style="font-weight: 500; color: var(--ink-2); margin-top: 4px;">${data.device_type || 'Unknown'}</div>
+                        </div>
+                        <div class="card-shell" style="padding: 1rem;">
+                            <div class="text-mono" style="font-size: 0.7rem; color: var(--ink-3); text-transform: uppercase;">Operating System</div>
+                            <div style="font-weight: 500; color: var(--ink-2); margin-top: 4px;">${data.operating_system || 'Unknown'}</div>
                         </div>
                     </div>
 
-                    <div class="detail-row">
-                        <div class="detail-label">Current Status</div>
+                    <div class="card-shell" style="padding: 1rem;">
+                        <div class="text-mono" style="font-size: 0.7rem; color: var(--ink-3); text-transform: uppercase; margin-bottom: 8px;">Open Ports</div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${ Array.isArray(data.open_ports) && data.open_ports.length
+                                ? data.open_ports.map(p => `<span class="badge-status" style="background: var(--surface-2); border-color: var(--border); color: var(--ink-2);">${p.port} (${p.service || 'unknown'})</span>`).join('')
+                                : '<span class="text-mono" style="font-size: 0.85rem; color: var(--ink-3);">No open ports detected.</span>' }
+                        </div>
+                    </div>
 
-                        <div class="detail-value">
-
-                            <select id="deviceStatusSelect" class="form-select">
-
+                    <div class="card-shell" style="padding: 1rem; display: flex; align-items: center; justify-content: space-between; background: var(--surface-2);">
+                        <div>
+                            <div class="text-mono" style="font-size: 0.7rem; color: var(--ink-3); text-transform: uppercase; margin-bottom: 4px;">Current Authorization Status</div>
+                            <select id="deviceStatusSelect" class="form-select" style="max-width: 200px; font-weight: 600;">
                                 <option value="AUTHORIZED">Authorized</option>
                                 <option value="UNAUTHORIZED">Unauthorized</option>
                                 <option value="REJECTED">Rejected</option>
                                 <option value="FLAGGED">Flagged</option>
-
                             </select>
-
                         </div>
+                        <button class="nm-btn nm-btn--primary" onclick="updateDeviceStatus(${data.id})">Save Changes</button>
                     </div>
-
-                    <button class="btn btn-primary authorize-btn"
-                            onclick="updateDeviceStatus(${data.id})">
-                        Save Changes
-                    </button>
-
                 `;
 
-                document.getElementById('deviceStatusSelect').value =
-                    data.status;
-
-                new bootstrap.Modal(
-                    document.getElementById('deviceModal')
-                ).show();
-
-            }
-
-            catch (error) {
-
+                document.getElementById('deviceStatusSelect').value = data.status;
+                new bootstrap.Modal(document.getElementById('deviceModal')).show();
+            } catch (error) {
                 console.error(error);
                 alert('Could not load device details.');
             }
         });
     });
-
 });
 
 function getCookie(name) {
-
     let cookieValue = null;
-
     if (document.cookie) {
-
         document.cookie.split(';').forEach(c => {
-
             const cookie = c.trim();
-
             if (cookie.startsWith(name + '=')) {
-
-                cookieValue =
-                    decodeURIComponent(cookie.split('=')[1]);
+                cookieValue = decodeURIComponent(cookie.split('=')[1]);
             }
         });
     }
-
     return cookieValue;
 }
 
 async function updateDeviceStatus(deviceId) {
-
-    const status =
-        document.getElementById('deviceStatusSelect').value;
-
+    const status = document.getElementById('deviceStatusSelect').value;
     try {
-
-        const response =
-            await fetch(`/devices/${deviceId}/update-status/`, {
-
-                method: 'POST',
-
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-
-                body: JSON.stringify({ status })
-            });
-
-        const result =
-            await response.json();
-
-        if (result.success) {
-            location.reload();
-        } else {
-            alert(result.error || 'Update failed');
-        }
-
+        const response = await fetch(`/devices/${deviceId}/update-status/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ status })
+        });
+        const result = await response.json();
+        if (result.success) { location.reload(); } 
+        else { alert(result.error || 'Update failed'); }
     } catch (err) {
         console.error(err);
         alert('Update failed');
     }
 }
 
-
 async function checkSecurity(deviceId) {
-
     try {
         const response = await fetch(`/devices/${deviceId}/check-security/`, {
             method: "POST",
@@ -460,39 +308,33 @@ async function checkSecurity(deviceId) {
                 "Content-Type": "application/json"
             }
         });
-
         const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || "Failed");
-        }
-
+        if (!response.ok) throw new Error(data.error || "Failed");
+        
         showModal(data.report);
-
     } catch (err) {
         console.error(err);
         alert("Security check failed");
     }
 }
 
-
 function formatReport(text) {
-
     return text
-        .replace(/Risk Level:/g, "<h3>🛡 Risk Level</h3>")
-        .replace(/Summary:/g, "<h3>📌 Summary</h3>")
-        .replace(/Key Issues:/g, "<h3>⚠ Key Issues</h3>")
+        .replace(/Risk Level:/g, "<h5 style='color: var(--blue); font-weight: 800; margin-top: 1rem;'>🛡 Risk Level</h5>")
+        .replace(/Summary:/g, "<h5 style='color: var(--blue); font-weight: 800; margin-top: 1rem;'>📌 Summary</h5>")
+        .replace(/Key Issues:/g, "<h5 style='color: var(--red); font-weight: 800; margin-top: 1rem;'>⚠ Key Issues</h5>")
         .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
 }
 
 function showModal(text) {
     const box = document.getElementById("modalText");
     box.innerHTML = formatReport(text);
-    document.getElementById("securityModal").style.display = "block";
+    new bootstrap.Modal(document.getElementById('securityModal')).show();
 }
 
 function closeModal() {
-    document.getElementById("securityModal").style.display = "none";
+    const modal = bootstrap.Modal.getInstance(document.getElementById('securityModal'));
+    if (modal) modal.hide();
 } 
 </script>
 
